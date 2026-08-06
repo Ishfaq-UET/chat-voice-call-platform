@@ -9,6 +9,7 @@ export interface User {
     is_online?: boolean;
     email_verified_at?: string;
     bio?: string | null;
+    phone?: string | null;
 }
 
 export interface FemaleProfile {

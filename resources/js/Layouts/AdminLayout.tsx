@@ -1,14 +1,75 @@
+import Dropdown from '@/Components/Dropdown';
+import {
+    IconChevronDown,
+    IconOverview,
+    IconSettings,
+    IconShield,
+    IconUsers,
+    IconWallet,
+} from '@/Components/Admin/AdminIcons';
 import { PageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { PropsWithChildren, ReactNode, useState } from 'react';
+import { ComponentType, PropsWithChildren, ReactNode, SVGProps, useState } from 'react';
 
-const adminLinks = [
-    { href: 'admin.dashboard', label: 'Overview', match: 'admin.dashboard' },
-    { href: 'admin.users', label: 'Users', match: 'admin.users' },
-    { href: 'admin.verifications', label: 'Verifications', match: 'admin.verifications' },
-    { href: 'admin.withdrawals', label: 'Withdrawals', match: 'admin.withdrawals' },
-    { href: 'admin.settings', label: 'Settings', match: 'admin.settings' },
-] as const;
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+const adminLinks: {
+    href: string;
+    label: string;
+    match: string;
+    icon: IconComponent;
+}[] = [
+    { href: 'admin.dashboard', label: 'Overview', match: 'admin.dashboard', icon: IconOverview },
+    { href: 'admin.users', label: 'Users', match: 'admin.users', icon: IconUsers },
+    { href: 'admin.verifications', label: 'Verifications', match: 'admin.verifications', icon: IconShield },
+    { href: 'admin.withdrawals', label: 'Withdrawals', match: 'admin.withdrawals', icon: IconWallet },
+    { href: 'admin.settings', label: 'Settings', match: 'admin.settings', icon: IconSettings },
+];
+
+function NavLink({
+    href,
+    label,
+    match,
+    icon: Icon,
+    onNavigate,
+}: {
+    href: string;
+    label: string;
+    match: string;
+    icon: IconComponent;
+    onNavigate?: () => void;
+}) {
+    const active = route().current(match);
+
+    return (
+        <Link
+            href={route(href)}
+            onClick={onNavigate}
+            className={`relative flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold transition ${
+                active
+                    ? 'bg-brand-soft text-brand'
+                    : 'text-slate-600 hover:bg-brand-soft/60 hover:text-brand'
+            }`}
+        >
+            {active && <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-brand" />}
+            <Icon className={active ? 'text-brand' : 'text-slate-400'} />
+            {label}
+        </Link>
+    );
+}
+
+function UserAvatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' }) {
+    const initial = name.trim().charAt(0).toUpperCase() || 'A';
+    const sizeClass = size === 'sm' ? 'h-8 w-8 text-xs' : 'h-9 w-9 text-sm';
+
+    return (
+        <span
+            className={`inline-flex shrink-0 items-center justify-center rounded-full bg-brand font-bold text-white shadow-soft ${sizeClass}`}
+        >
+            {initial}
+        </span>
+    );
+}
 
 export default function AdminLayout({
     header,
@@ -20,20 +81,22 @@ export default function AdminLayout({
 
     return (
         <div className="min-h-screen bg-canvas">
-            <div className="bg-brand px-4 py-2 text-center text-xs font-bold text-white">
+            <div className="bg-brand px-4 py-2 text-center text-xs font-bold text-white sm:text-sm">
                 Admin panel · ChatVoiceCall
             </div>
 
             <div className="flex min-h-[calc(100vh-36px)]">
                 {/* Desktop sidebar */}
-                <aside className="hidden w-64 shrink-0 border-r border-brand/10 bg-white lg:flex lg:flex-col">
+                <aside className="hidden w-[260px] shrink-0 flex-col border-r border-brand/10 bg-white lg:flex">
                     <div className="border-b border-brand/10 px-5 py-5">
-                        <Link href={route('admin.dashboard')} className="inline-flex items-center gap-2">
-                            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand text-sm font-black text-white">
+                        <Link href={route('admin.dashboard')} className="inline-flex items-center gap-2.5">
+                            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand text-sm font-black text-white shadow-soft">
                                 CV
                             </span>
                             <div>
-                                <p className="text-sm font-extrabold text-brand">ChatVoiceCall</p>
+                                <p className="text-[15px] font-extrabold tracking-tight text-brand">
+                                    ChatVoice<span className="text-ink">Call</span>
+                                </p>
                                 <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                                     Admin
                                 </p>
@@ -41,51 +104,27 @@ export default function AdminLayout({
                         </Link>
                     </div>
 
-                    <nav className="flex-1 space-y-1 p-3">
-                        {adminLinks.map((item) => {
-                            const active = route().current(item.match);
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={route(item.href)}
-                                    className={`flex items-center rounded-2xl px-4 py-3 text-sm font-bold transition ${
-                                        active
-                                            ? 'bg-brand text-white shadow-soft'
-                                            : 'text-slate-600 hover:bg-brand-soft hover:text-brand'
-                                    }`}
-                                >
-                                    {item.label}
-                                </Link>
-                            );
-                        })}
+                    <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+                        {adminLinks.map((item) => (
+                            <NavLink key={item.href} {...item} />
+                        ))}
                     </nav>
 
                     <div className="border-t border-brand/10 p-4">
-                        <p className="truncate text-sm font-bold text-ink">{user.name}</p>
-                        <p className="truncate text-xs text-slate-400">{user.email}</p>
-                        <div className="mt-3 flex gap-2">
-                            <Link
-                                href={route('profile.edit')}
-                                className="rounded-xl bg-canvas px-3 py-1.5 text-xs font-bold text-slate-600"
-                            >
-                                Profile
-                            </Link>
-                            <Link
-                                href={route('logout')}
-                                method="post"
-                                as="button"
-                                className="rounded-xl bg-canvas px-3 py-1.5 text-xs font-bold text-slate-600"
-                            >
-                                Log out
-                            </Link>
+                        <div className="flex items-center gap-3 rounded-2xl bg-canvas px-3 py-2.5">
+                            <UserAvatar name={user.name} />
+                            <div className="min-w-0">
+                                <p className="truncate text-sm font-bold text-ink">{user.name}</p>
+                                <p className="truncate text-[11px] capitalize text-slate-400">{user.role}</p>
+                            </div>
                         </div>
                     </div>
                 </aside>
 
                 {/* Main */}
                 <div className="flex min-w-0 flex-1 flex-col">
-                    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-brand/10 bg-white/90 px-4 py-3 backdrop-blur lg:px-6">
-                        <div className="flex items-center gap-3">
+                    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-brand/10 bg-white/90 px-4 py-3 backdrop-blur-xl lg:px-6">
+                        <div className="flex min-w-0 items-center gap-3">
                             <button
                                 type="button"
                                 className="rounded-2xl bg-brand-soft px-3 py-2 text-sm font-bold text-brand lg:hidden"
@@ -93,24 +132,37 @@ export default function AdminLayout({
                             >
                                 Menu
                             </button>
-                            <div>{header}</div>
+                            <div className="min-w-0 text-lg font-extrabold text-ink">{header}</div>
                         </div>
-                        <Link href="/" className="text-xs font-bold text-slate-400 hover:text-brand">
-                            View site
-                        </Link>
+
+                        <Dropdown>
+                            <Dropdown.Trigger>
+                                <button
+                                    type="button"
+                                    className="inline-flex items-center gap-2.5 rounded-2xl border border-brand/10 bg-white px-2.5 py-1.5 text-left shadow-sm transition hover:bg-brand-soft/50"
+                                >
+                                    <UserAvatar name={user.name} size="sm" />
+                                    <span className="hidden sm:block">
+                                        <span className="block text-sm font-bold text-ink">{user.name}</span>
+                                        <span className="block text-[11px] capitalize text-slate-400">{user.role}</span>
+                                    </span>
+                                    <IconChevronDown className="text-slate-400" />
+                                </button>
+                            </Dropdown.Trigger>
+                            <Dropdown.Content width="48" contentClasses="py-1 bg-white">
+                                <Dropdown.Link href={route('profile.edit')}>My profile</Dropdown.Link>
+                                <Dropdown.Link href="/">View site</Dropdown.Link>
+                                <Dropdown.Link href={route('logout')} method="post" as="button">
+                                    Log out
+                                </Dropdown.Link>
+                            </Dropdown.Content>
+                        </Dropdown>
                     </header>
 
                     {open && (
-                        <div className="border-b border-brand/10 bg-white p-3 lg:hidden">
+                        <div className="space-y-1 border-b border-brand/10 bg-white p-3 lg:hidden">
                             {adminLinks.map((item) => (
-                                <Link
-                                    key={item.href}
-                                    href={route(item.href)}
-                                    className="block rounded-2xl px-4 py-3 text-sm font-bold text-slate-600 hover:bg-brand-soft"
-                                    onClick={() => setOpen(false)}
-                                >
-                                    {item.label}
-                                </Link>
+                                <NavLink key={item.href} {...item} onNavigate={() => setOpen(false)} />
                             ))}
                         </div>
                     )}
