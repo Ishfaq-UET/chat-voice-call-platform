@@ -9,6 +9,7 @@ use App\Models\Conversation;
 use App\Models\User;
 use App\Services\AgoraService;
 use App\Services\WalletService;
+use App\Support\SafeBroadcast;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -48,7 +49,7 @@ class CallController extends Controller
             'agora_channel' => $agora->channelForCall($call->id),
         ]);
 
-        broadcast(new IncomingCall($call->fresh('male')));
+        SafeBroadcast::dispatch(new IncomingCall($call->fresh('male')));
 
         return redirect()->route('calls.show', $call);
     }
@@ -82,7 +83,7 @@ class CallController extends Controller
             'started_at' => now(),
         ]);
 
-        broadcast(new CallStatusUpdated($call->fresh()));
+        SafeBroadcast::dispatch(new CallStatusUpdated($call->fresh()));
 
         return redirect()->route('calls.show', $call);
     }
@@ -96,7 +97,7 @@ class CallController extends Controller
             'ended_at' => now(),
         ]);
 
-        broadcast(new CallStatusUpdated($call->fresh()));
+        SafeBroadcast::dispatch(new CallStatusUpdated($call->fresh()));
 
         return redirect()->route('chat.index');
     }
@@ -180,6 +181,6 @@ class CallController extends Controller
             'ended_at' => now(),
         ]);
 
-        broadcast(new CallStatusUpdated($call->fresh()));
+        SafeBroadcast::dispatch(new CallStatusUpdated($call->fresh()));
     }
 }
