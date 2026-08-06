@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         $wallets = app(WalletService::class);
 
         $admin = User::query()->updateOrCreate(
-            ['email' => 'admin@example.com'],
+            ['email' => 'admin@admin.com'],
             [
                 'name' => 'Admin',
                 'password' => Hash::make('password'),
@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
         $wallets->ensureWallet($admin);
 
         $male = User::query()->updateOrCreate(
-            ['email' => 'male@example.com'],
+            ['email' => 'male@gmail.com'],
             [
                 'name' => 'Demo Male',
                 'password' => Hash::make('password'),
@@ -50,7 +50,7 @@ class DatabaseSeeder extends Seeder
 
         $creators = [
             [
-                'email' => 'female@example.com',
+                'email' => 'female@gmail.com',
                 'name' => 'Ava Brooks',
                 'bio' => 'Late-night talks, soft voice notes, and unhurried calls. Tell me about your week.',
                 'online' => true,
@@ -59,7 +59,7 @@ class DatabaseSeeder extends Seeder
                 'call' => 6.00,
             ],
             [
-                'email' => 'mia@example.com',
+                'email' => 'mia@gmail.com',
                 'name' => 'Mia Torres',
                 'bio' => 'Language swap & travel stories. Patient listener. Voice calls welcome.',
                 'online' => true,
@@ -68,7 +68,7 @@ class DatabaseSeeder extends Seeder
                 'call' => 5.00,
             ],
             [
-                'email' => 'luna@example.com',
+                'email' => 'luna@gmail.com',
                 'name' => 'Luna Park',
                 'bio' => 'Music nerd. Send a song rec, get one back. Chill energy only.',
                 'online' => false,
@@ -77,7 +77,7 @@ class DatabaseSeeder extends Seeder
                 'call' => 7.50,
             ],
             [
-                'email' => 'nora@example.com',
+                'email' => 'nora@gmail.com',
                 'name' => 'Nora Quinn',
                 'bio' => 'Deep chats about work stress, creativity, and resetting after long days.',
                 'online' => true,
@@ -86,7 +86,7 @@ class DatabaseSeeder extends Seeder
                 'call' => 5.50,
             ],
             [
-                'email' => 'sofia@example.com',
+                'email' => 'sofia@gmail.com',
                 'name' => 'Sofia Reyes',
                 'bio' => 'Warm conversation and laughter. Prefer voice notes over endless typing.',
                 'online' => false,
@@ -95,7 +95,7 @@ class DatabaseSeeder extends Seeder
                 'call' => 4.50,
             ],
             [
-                'email' => 'iris@example.com',
+                'email' => 'iris@gmail.com',
                 'name' => 'Iris Cho',
                 'bio' => 'Bookish nights, tea recommendations, and calm call energy.',
                 'online' => true,
@@ -104,7 +104,7 @@ class DatabaseSeeder extends Seeder
                 'call' => 4.00,
             ],
             [
-                'email' => 'elena@example.com',
+                'email' => 'elena@gmail.com',
                 'name' => 'Elena Vogt',
                 'bio' => 'Direct, curious, multilingual. Practice speaking or just vent.',
                 'online' => false,
@@ -113,7 +113,7 @@ class DatabaseSeeder extends Seeder
                 'call' => 8.00,
             ],
             [
-                'email' => 'zara@example.com',
+                'email' => 'zara@gmail.com',
                 'name' => 'Zara Ahmed',
                 'bio' => 'Friendly check-ins and playful banter. Online evenings most nights.',
                 'online' => true,
@@ -122,7 +122,7 @@ class DatabaseSeeder extends Seeder
                 'call' => 5.25,
             ],
             [
-                'email' => 'hannah@example.com',
+                'email' => 'hannah@gmail.com',
                 'name' => 'Hannah Lee',
                 'bio' => 'Fitness, food, and honest talks. Quick replies when the green dot is on.',
                 'online' => true,
@@ -131,7 +131,7 @@ class DatabaseSeeder extends Seeder
                 'call' => 6.50,
             ],
             [
-                'email' => 'priya@example.com',
+                'email' => 'priya@gmail.com',
                 'name' => 'Priya Nair',
                 'bio' => 'Soft-spoken calls and thoughtful messages. Slow evenings preferred.',
                 'online' => false,
@@ -140,7 +140,7 @@ class DatabaseSeeder extends Seeder
                 'call' => 5.75,
             ],
             [
-                'email' => 'jade@example.com',
+                'email' => 'jade@gmail.com',
                 'name' => 'Jade Okonkwo',
                 'bio' => 'Creative spark sessions. Share an idea — I’ll ask better questions.',
                 'online' => true,
@@ -149,7 +149,7 @@ class DatabaseSeeder extends Seeder
                 'call' => 7.00,
             ],
             [
-                'email' => 'claire@example.com',
+                'email' => 'claire@gmail.com',
                 'name' => 'Claire Dubois',
                 'bio' => 'Paris evenings, cinema takes, and quiet company on longer calls.',
                 'online' => false,
