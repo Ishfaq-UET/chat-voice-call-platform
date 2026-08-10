@@ -27,8 +27,27 @@ return Application::configure(basePath: dirname(__DIR__))
             'stripe/webhook',
         ]);
 
-        $middleware->redirectGuestsTo(fn () => route('login'));
-        $middleware->redirectUsersTo(fn () => route('dashboard'));
+        $middleware->redirectGuestsTo(function (Request $request) {
+            if ($request->is('admin') || $request->is('admin/*')) {
+                return route('admin.login');
+            }
+
+            return route('login');
+        });
+
+        $middleware->redirectUsersTo(function (Request $request) {
+            $user = $request->user();
+
+            if ($user?->isAdmin()) {
+                return route('admin.dashboard');
+            }
+
+            if ($user?->isFemale()) {
+                return route('female.dashboard');
+            }
+
+            return route('home');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

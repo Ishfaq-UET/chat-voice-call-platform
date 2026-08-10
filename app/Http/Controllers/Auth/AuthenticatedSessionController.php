@@ -33,7 +33,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = $request->user();
+
+        if ($user?->isFemale()) {
+            return redirect()->intended(route('female.dashboard', absolute: false));
+        }
+
+        return redirect()->intended(route('home', absolute: false));
     }
 
     /**
@@ -41,12 +47,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $wasAdmin = $request->user()?->isAdmin();
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect($wasAdmin ? route('admin.login') : '/');
     }
 }

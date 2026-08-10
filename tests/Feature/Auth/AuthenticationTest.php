@@ -27,7 +27,57 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('home', absolute: false));
+    }
+
+    public function test_admin_login_screen_can_be_rendered(): void
+    {
+        $response = $this->get('/login/admin');
+
+        $response->assertStatus(200);
+    }
+
+    public function test_admins_can_authenticate_using_the_admin_login_screen(): void
+    {
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $response = $this->post('/login/admin', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('admin.dashboard', absolute: false));
+    }
+
+    public function test_admins_cannot_authenticate_using_the_public_login_screen(): void
+    {
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $response = $this->from('/login')->post('/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors('email');
+    }
+
+    public function test_members_cannot_authenticate_using_the_admin_login_screen(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->from('/login/admin')->post('/login/admin', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors('email');
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
