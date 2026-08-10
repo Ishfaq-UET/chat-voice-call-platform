@@ -12,8 +12,14 @@ class CreatorController extends Controller
 {
     public function show(Request $request, User $female): Response
     {
-        abort_unless($request->user()?->isMale(), 403);
-        abort_unless($female->isVerifiedFemale() && ! $female->is_banned, 404);
+        $viewer = $request->user();
+        abort_unless($viewer?->isMale() || $viewer?->isAdmin(), 403);
+        abort_unless($female->isFemale() && ! $female->is_banned, 404);
+
+        // Members only see approved creators; admins can preview pending ones too.
+        if ($viewer->isMale()) {
+            abort_unless($female->isVerifiedFemale(), 404);
+        }
 
         $female->load('femaleProfile');
 
@@ -29,7 +35,8 @@ class CreatorController extends Controller
                 'created_at' => $female->created_at?->toDateString(),
                 'female_profile' => $female->femaleProfile,
             ],
-            'walletBalance' => (float) app(WalletService::class)->ensureWallet($request->user())->balance,
+            'walletBalance' => (float) app(WalletService::class)->ensureWallet($viewer)->balance,
+            'adminPreview' => $viewer->isAdmin(),
         ]);
     }
 }

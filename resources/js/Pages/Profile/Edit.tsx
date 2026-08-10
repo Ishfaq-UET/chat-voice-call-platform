@@ -8,7 +8,12 @@ import UpdateProfileInformationForm from './Partials/UpdateProfileInformationFor
 export default function Edit({
     mustVerifyEmail,
     status,
-}: PageProps<{ mustVerifyEmail: boolean; status?: string }>) {
+    pendingNameChange,
+}: PageProps<{
+    mustVerifyEmail: boolean;
+    status?: string;
+    pendingNameChange?: { requested_name: string; current_name: string } | null;
+}>) {
     return (
         <AuthenticatedLayout
             header={
@@ -26,6 +31,7 @@ export default function Edit({
                         <UpdateProfileInformationForm
                             mustVerifyEmail={mustVerifyEmail}
                             status={status}
+                            pendingNameChange={pendingNameChange}
                         />
                     </div>
 

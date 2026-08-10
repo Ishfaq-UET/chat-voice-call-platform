@@ -1,7 +1,11 @@
 import Dropdown from '@/Components/Dropdown';
 import {
+    IconChat,
     IconChevronDown,
+    IconLedger,
     IconOverview,
+    IconPhone,
+    IconRename,
     IconSettings,
     IconShield,
     IconUsers,
@@ -20,10 +24,14 @@ const adminLinks: {
     icon: IconComponent;
 }[] = [
     { href: 'admin.dashboard', label: 'Overview', match: 'admin.dashboard', icon: IconOverview },
-    { href: 'admin.users', label: 'Users', match: 'admin.users', icon: IconUsers },
-    { href: 'admin.verifications', label: 'Verifications', match: 'admin.verifications', icon: IconShield },
-    { href: 'admin.withdrawals', label: 'Withdrawals', match: 'admin.withdrawals', icon: IconWallet },
-    { href: 'admin.settings', label: 'Settings', match: 'admin.settings', icon: IconSettings },
+    { href: 'admin.users', label: 'Users', match: 'admin.users*', icon: IconUsers },
+    { href: 'admin.verifications', label: 'Verifications', match: 'admin.verifications*', icon: IconShield },
+    { href: 'admin.name-changes', label: 'Name changes', match: 'admin.name-changes*', icon: IconRename },
+    { href: 'admin.chats', label: 'Chats & voices', match: 'admin.chats*', icon: IconChat },
+    { href: 'admin.calls', label: 'Calls', match: 'admin.calls*', icon: IconPhone },
+    { href: 'admin.transactions', label: 'Transactions', match: 'admin.transactions*', icon: IconLedger },
+    { href: 'admin.withdrawals', label: 'Withdrawals', match: 'admin.withdrawals*', icon: IconWallet },
+    { href: 'admin.settings', label: 'Settings', match: 'admin.settings*', icon: IconSettings },
 ];
 
 function NavLink({
@@ -39,7 +47,8 @@ function NavLink({
     icon: IconComponent;
     onNavigate?: () => void;
 }) {
-    const active = route().current(match);
+    const base = match.replace(/\*$/, '');
+    const active = route().current(base) || route().current(`${base}.*`);
 
     return (
         <Link

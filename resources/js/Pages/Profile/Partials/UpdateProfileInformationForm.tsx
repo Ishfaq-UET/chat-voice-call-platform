@@ -10,10 +10,12 @@ import { FormEventHandler, useState } from 'react';
 export default function UpdateProfileInformation({
     mustVerifyEmail,
     status,
+    pendingNameChange,
     className = '',
 }: {
     mustVerifyEmail: boolean;
     status?: string;
+    pendingNameChange?: { requested_name: string; current_name: string } | null;
     className?: string;
 }) {
     const user = usePage<PageProps>().props.auth.user!;
@@ -111,8 +113,28 @@ export default function UpdateProfileInformation({
 
             <header className="mt-10">
                 <h2 className="text-lg font-extrabold text-ink">Account</h2>
-                <p className="mt-1 text-sm text-slate-500">Update your name and email address.</p>
+                <p className="mt-1 text-sm text-slate-500">
+                    Update your email anytime. Display name changes require admin approval.
+                </p>
             </header>
+
+            {pendingNameChange && (
+                <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                    Name change pending review: {pendingNameChange.current_name} → {pendingNameChange.requested_name}
+                </div>
+            )}
+
+            {status === 'name-change-submitted' && (
+                <div className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                    Name change submitted for admin approval.
+                </div>
+            )}
+
+            {status === 'name-change-pending' && (
+                <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                    You already have a pending name change request.
+                </div>
+            )}
 
             <form onSubmit={submit} className="mt-6 space-y-6">
                 <div>
@@ -125,6 +147,7 @@ export default function UpdateProfileInformation({
                         required
                         isFocused
                         autoComplete="name"
+                        disabled={Boolean(pendingNameChange) && user.role !== 'admin'}
                     />
                     <InputError className="mt-2" message={errors.name} />
                 </div>

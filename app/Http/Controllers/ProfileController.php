@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\NameChangeRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,31 +14,52 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
     public function edit(Request $request): Response
     {
+        $user = $request->user();
+
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
+            'pendingNameChange' => $user->isAdmin()
+                ? null
+                : $user->nameChangeRequests()->where('status', 'pending')->latest()->first(),
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
+        $requestedName = $validated['name'];
+        $nameChanged = $requestedName !== $user->name;
+        $status = null;
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if (! $user->isAdmin() && $nameChanged) {
+            if ($user->nameChangeRequests()->where('status', 'pending')->exists()) {
+                return Redirect::route('profile.edit')->with('status', 'name-change-pending');
+            }
+
+            NameChangeRequest::query()->create([
+                'user_id' => $user->id,
+                'current_name' => $user->name,
+                'requested_name' => $requestedName,
+                'status' => 'pending',
+            ]);
+
+            unset($validated['name']);
+            $status = 'name-change-submitted';
         }
 
-        $request->user()->save();
+        $user->fill($validated);
 
-        return Redirect::route('profile.edit');
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        return Redirect::route('profile.edit')->with('status', $status);
     }
 
     public function updateAvatar(Request $request): RedirectResponse
@@ -58,9 +80,6 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'avatar-updated');
     }
 
-    /**
-     * Delete the user's account.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         $request->validate([

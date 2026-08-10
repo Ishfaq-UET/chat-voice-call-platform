@@ -110,4 +110,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Withdrawal::class);
     }
+
+    public function nameChangeRequests(): HasMany
+    {
+        return $this->hasMany(NameChangeRequest::class);
+    }
 }

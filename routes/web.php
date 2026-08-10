@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\CallController as AdminCallController;
+use App\Http\Controllers\Admin\ConversationController as AdminConversationController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\NameChangeController as AdminNameChangeController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
@@ -70,6 +74,7 @@ Route::middleware(['auth', 'online'])->group(function () {
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
+
         Route::get('/users', [AdminUserController::class, 'index'])->name('users');
         Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
         Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
@@ -77,12 +82,27 @@ Route::middleware(['auth', 'online'])->group(function () {
         Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
         Route::post('/users/{user}/ban', [AdminUserController::class, 'toggleBan'])->name('users.ban');
+
         Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications');
         Route::post('/verifications/{verification}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
         Route::post('/verifications/{verification}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
+
+        Route::get('/name-changes', [AdminNameChangeController::class, 'index'])->name('name-changes');
+        Route::post('/name-changes/{nameChange}/approve', [AdminNameChangeController::class, 'approve'])->name('name-changes.approve');
+        Route::post('/name-changes/{nameChange}/reject', [AdminNameChangeController::class, 'reject'])->name('name-changes.reject');
+
+        Route::get('/chats', [AdminConversationController::class, 'index'])->name('chats');
+        Route::get('/chats/{conversation}', [AdminConversationController::class, 'show'])->name('chats.show');
+
+        Route::get('/calls', [AdminCallController::class, 'index'])->name('calls');
+        Route::get('/calls/{call}', [AdminCallController::class, 'show'])->name('calls.show');
+
+        Route::get('/transactions', [AdminTransactionController::class, 'index'])->name('transactions');
+
         Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals');
         Route::post('/withdrawals/{withdrawal}/approve', [AdminWithdrawalController::class, 'approve'])->name('withdrawals.approve');
         Route::post('/withdrawals/{withdrawal}/reject', [AdminWithdrawalController::class, 'reject'])->name('withdrawals.reject');
+
         Route::get('/settings', [AdminSettingsController::class, 'edit'])->name('settings');
         Route::post('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
     });
