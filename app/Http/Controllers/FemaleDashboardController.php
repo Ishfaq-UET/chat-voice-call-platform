@@ -103,7 +103,7 @@ class FemaleDashboardController extends Controller
         }
 
         $data = $request->validate([
-            'selfie' => ['required', 'image', 'max:5120'],
+            'selfie' => ['required', 'image', 'mimes:jpeg,jpg', 'max:5120'],
             'id_photo' => ['nullable', 'image', 'max:5120'],
         ]);
 

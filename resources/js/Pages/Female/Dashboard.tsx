@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import SelfieCameraCapture from '@/Components/SelfieCameraCapture';
 import { FemaleProfile, PageProps } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler, useMemo, useState } from 'react';
@@ -80,6 +81,10 @@ export default function FemaleDashboard({
 
     const submitVerification: FormEventHandler = (e) => {
         e.preventDefault();
+        if (!verificationForm.data.selfie) {
+            verificationForm.setError('selfie', 'Please capture a live selfie with your camera.');
+            return;
+        }
         verificationForm.post(route('female.verification'), { forceFormData: true });
     };
 
@@ -207,36 +212,23 @@ export default function FemaleDashboard({
                     <form onSubmit={submitVerification} className="card-soft p-5">
                         <h3 className="text-lg font-extrabold text-ink">Face verification</h3>
                         <p className="mt-1 text-sm text-slate-500">
-                            Upload a clear selfie for admin review. Required before you appear in Discover.
+                            Take a live selfie with your camera for admin review. Gallery uploads are not accepted.
+                            Required before you appear in Discover.
                         </p>
-                        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                        <div className="mt-4 grid gap-6 lg:grid-cols-2">
                             <div>
-                                <label className="text-sm font-bold text-slate-700">Selfie</label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="mt-1 block w-full text-sm"
-                                    onChange={(e) =>
-                                        verificationForm.setData('selfie', e.target.files?.[0] ?? null)
-                                    }
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="text-sm font-bold text-slate-700">ID photo (optional)</label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="mt-1 block w-full text-sm"
-                                    onChange={(e) =>
-                                        verificationForm.setData('id_photo', e.target.files?.[0] ?? null)
-                                    }
-                                />
+                                <label className="text-sm font-bold text-slate-700">Live selfie</label>
+                                <div className="mt-2">
+                                    <SelfieCameraCapture
+                                        onCapture={(file) => verificationForm.setData('selfie', file)}
+                                        error={verificationForm.errors.selfie}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <button
-                            disabled={verificationForm.processing}
-                            className="mt-4 rounded-2xl bg-brand px-5 py-2.5 text-sm font-extrabold text-white shadow-soft hover:bg-brand-deep"
+                            disabled={verificationForm.processing || !verificationForm.data.selfie}
+                            className="mt-4 rounded-2xl bg-brand px-5 py-2.5 text-sm font-extrabold text-white shadow-soft hover:bg-brand-deep disabled:opacity-40"
                         >
                             Submit for review
                         </button>
