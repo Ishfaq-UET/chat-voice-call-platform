@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CallController as AdminCallController;
 use App\Http\Controllers\Admin\ConversationController as AdminConversationController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ManualTopUpController as AdminManualTopUpController;
 use App\Http\Controllers\Admin\NameChangeController as AdminNameChangeController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
@@ -48,6 +49,7 @@ Route::middleware(['auth', 'online'])->group(function () {
 
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/top-up', [WalletController::class, 'topUp'])->name('wallet.top-up');
+    Route::post('/wallet/manual-top-up', [WalletController::class, 'requestManualTopUp'])->name('wallet.manual-top-up');
 
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat/start/{female}', [ChatController::class, 'start'])->name('chat.start');
@@ -82,6 +84,7 @@ Route::middleware(['auth', 'online'])->group(function () {
         Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
         Route::post('/users/{user}/ban', [AdminUserController::class, 'toggleBan'])->name('users.ban');
+        Route::post('/users/{user}/wallet', [AdminUserController::class, 'adjustWallet'])->name('users.wallet');
 
         Route::get('/verifications', [AdminVerificationController::class, 'index'])->name('verifications');
         Route::post('/verifications/{verification}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
@@ -98,6 +101,10 @@ Route::middleware(['auth', 'online'])->group(function () {
         Route::get('/calls/{call}', [AdminCallController::class, 'show'])->name('calls.show');
 
         Route::get('/transactions', [AdminTransactionController::class, 'index'])->name('transactions');
+
+        Route::get('/top-ups', [AdminManualTopUpController::class, 'index'])->name('top-ups');
+        Route::post('/top-ups/{topUp}/approve', [AdminManualTopUpController::class, 'approve'])->name('top-ups.approve');
+        Route::post('/top-ups/{topUp}/reject', [AdminManualTopUpController::class, 'reject'])->name('top-ups.reject');
 
         Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals');
         Route::post('/withdrawals/{withdrawal}/approve', [AdminWithdrawalController::class, 'approve'])->name('withdrawals.approve');

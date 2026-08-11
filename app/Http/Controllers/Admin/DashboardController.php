@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Call;
 use App\Models\Conversation;
+use App\Models\ManualTopUpRequest;
 use App\Models\Message;
 use App\Models\NameChangeRequest;
 use App\Models\User;
@@ -34,6 +35,7 @@ class DashboardController extends Controller
                 'pending_verifications' => VerificationRequest::query()->where('status', 'pending')->count(),
                 'pending_name_changes' => NameChangeRequest::query()->where('status', 'pending')->count(),
                 'pending_withdrawals' => Withdrawal::query()->where('status', 'pending')->count(),
+                'pending_top_ups' => ManualTopUpRequest::query()->where('status', 'pending')->count(),
                 'conversations' => Conversation::query()->count(),
                 'messages' => Message::query()->count(),
                 'voice_notes' => Message::query()->where('type', 'voice')->count(),

@@ -33,6 +33,7 @@ export default function AdminDashboard({
         pending_verifications: number;
         pending_name_changes: number;
         pending_withdrawals: number;
+        pending_top_ups: number;
         conversations: number;
         messages: number;
         voice_notes: number;
@@ -51,6 +52,7 @@ export default function AdminDashboard({
         ['Pending verifications', stats.pending_verifications, route('admin.verifications')],
         ['Name change requests', stats.pending_name_changes, route('admin.name-changes')],
         ['Pending withdrawals', stats.pending_withdrawals, route('admin.withdrawals')],
+        ['Pending top-ups', stats.pending_top_ups ?? 0, route('admin.top-ups')],
         ['Conversations', stats.conversations, route('admin.chats')],
         ['Voice notes', stats.voice_notes, route('admin.chats')],
         ['Calls', stats.calls, route('admin.calls')],

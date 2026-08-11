@@ -115,4 +115,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(NameChangeRequest::class);
     }
+
+    public function manualTopUpRequests(): HasMany
+    {
+        return $this->hasMany(ManualTopUpRequest::class);
+    }
 }

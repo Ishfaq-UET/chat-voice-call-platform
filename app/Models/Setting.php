@@ -36,4 +36,12 @@ class Setting extends Model
     {
         return (float) static::getValue('min_withdrawal', 20);
     }
+
+    public static function manualTopUpInstructions(): string
+    {
+        return (string) static::getValue(
+            'manual_topup_instructions',
+            "Send payment via JazzCash, EasyPaisa, or bank transfer, then submit proof in the wallet form.\nJazzCash: 0300-0000000\nEasyPaisa: 0300-0000000\nBank: Your Bank Name · Account 0000000000 · ChatVoiceCall",
+        );
+    }
 }

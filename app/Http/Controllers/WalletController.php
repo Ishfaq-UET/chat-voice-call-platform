@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ManualTopUpRequest;
+use App\Models\Setting;
 use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,13 +19,24 @@ class WalletController extends Controller
 {
     public function index(Request $request, WalletService $wallets): Response
     {
-        $wallet = $wallets->ensureWallet($request->user());
+        $user = $request->user();
+        $wallet = $wallets->ensureWallet($user);
         $transactions = $wallet->transactions()->latest()->paginate(20);
+
+        $manualRequests = $user->manualTopUpRequests()
+            ->latest()
+            ->limit(10)
+            ->get();
 
         return Inertia::render('Wallet/Index', [
             'balance' => (float) $wallet->balance,
             'transactions' => $transactions,
             'stripeEnabled' => (bool) config('services.stripe.secret'),
+            'paypalEnabled' => (bool) config('services.paypal.client_id'),
+            'manualInstructions' => Setting::manualTopUpInstructions(),
+            'manualChannels' => ManualTopUpRequest::CHANNELS,
+            'manualRequests' => $manualRequests,
+            'hasPendingManual' => $user->manualTopUpRequests()->where('status', 'pending')->exists(),
         ]);
     }
 
@@ -36,17 +49,10 @@ class WalletController extends Controller
         $amount = (float) $data['amount'];
         $secret = config('services.stripe.secret');
 
-        // Local/demo mode: instant credit without Stripe.
         if (! $secret) {
-            $wallets->credit(
-                $request->user(),
-                $amount,
-                'top_up',
-                'Demo wallet top-up',
-                meta: ['demo' => true],
-            );
-
-            return back()->with('success', 'Demo top-up successful.');
+            return back()->withErrors([
+                'amount' => 'Card payments are not configured. Please use manual payment with screenshot.',
+            ]);
         }
 
         Stripe::setApiKey($secret);
@@ -71,6 +77,48 @@ class WalletController extends Controller
         ]);
 
         return Inertia::location($session->url);
+    }
+
+    public function requestManualTopUp(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($user->manualTopUpRequests()->where('status', 'pending')->exists()) {
+            return back()->withErrors([
+                'manual' => 'You already have a pending manual payment request. Wait for admin review.',
+            ]);
+        }
+
+        $data = $request->validate([
+            'payment_channel' => ['required', 'string', 'in:'.implode(',', array_keys(ManualTopUpRequest::CHANNELS))],
+            'sender_account_name' => ['required', 'string', 'max:120'],
+            'sender_number' => ['required', 'string', 'max:40'],
+            'receiver_account' => ['required', 'string', 'max:120'],
+            'amount' => ['required', 'numeric', 'min:5', 'max:500'],
+            'transaction_id' => ['required', 'string', 'max:120'],
+            'screenshot' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+            'member_notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $path = $data['screenshot']->store('top-up-screenshots', 'public');
+
+        ManualTopUpRequest::query()->create([
+            'user_id' => $user->id,
+            'payment_channel' => $data['payment_channel'],
+            'sender_account_name' => trim($data['sender_account_name']),
+            'sender_number' => trim($data['sender_number']),
+            'receiver_account' => trim($data['receiver_account']),
+            'amount' => round((float) $data['amount'], 2),
+            'transaction_id' => trim($data['transaction_id']),
+            'screenshot_path' => $path,
+            'member_notes' => isset($data['member_notes']) ? trim($data['member_notes']) : null,
+            'status' => 'pending',
+        ]);
+
+        return back()->with(
+            'success',
+            'Manual payment submitted. An admin will verify the details and screenshot, then add the balance.',
+        );
     }
 
     public function webhook(Request $request, WalletService $wallets): SymfonyResponse

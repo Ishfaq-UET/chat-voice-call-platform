@@ -13,7 +13,19 @@ type AdminUser = User & {
     wallet?: { balance: number | string };
 };
 
-export default function AdminUsersEdit({ user }: PageProps<{ user: AdminUser }>) {
+type Txn = {
+    id: number;
+    type: string;
+    amount: number | string;
+    balance_after: number | string;
+    description?: string | null;
+    created_at: string;
+};
+
+export default function AdminUsersEdit({
+    user,
+    recentTransactions = [],
+}: PageProps<{ user: AdminUser; recentTransactions?: Txn[] }>) {
     const form = useForm({
         name: user.name,
         email: user.email,
@@ -26,10 +38,26 @@ export default function AdminUsersEdit({ user }: PageProps<{ user: AdminUser }>)
         is_banned: Boolean(user.is_banned),
     });
 
+    const walletForm = useForm({
+        amount: 20,
+        direction: 'credit' as 'credit' | 'debit',
+        note: '',
+    });
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         form.put(route('admin.users.update', user.id));
     };
+
+    const submitWallet: FormEventHandler = (e) => {
+        e.preventDefault();
+        walletForm.post(route('admin.users.wallet', user.id), {
+            preserveScroll: true,
+            onSuccess: () => walletForm.setData({ amount: 20, direction: 'credit', note: '' }),
+        });
+    };
+
+    const balance = Number(user.wallet?.balance ?? 0);
 
     return (
         <AdminLayout header="Edit User">
@@ -152,12 +180,6 @@ export default function AdminUsersEdit({ user }: PageProps<{ user: AdminUser }>)
                                 <InputError message={form.errors.bio} className="mt-1.5" />
                             </AdminField>
                         </div>
-                        {user.wallet && (
-                            <p className="mt-4 text-sm text-slate-500">
-                                Wallet balance:{' '}
-                                <span className="font-bold text-ink">${Number(user.wallet.balance).toFixed(2)}</span>
-                            </p>
-                        )}
                     </AdminFormSection>
 
                     <div className="flex justify-end gap-3">
@@ -169,6 +191,107 @@ export default function AdminUsersEdit({ user }: PageProps<{ user: AdminUser }>)
                         </button>
                     </div>
                 </form>
+
+                <AdminFormSection
+                    title="Manual wallet payment"
+                    description="Add or remove wallet balance manually (cash / bank received offline)."
+                >
+                    <div className="mb-5 rounded-2xl bg-canvas px-4 py-3">
+                        <p className="text-sm text-slate-500">Current balance</p>
+                        <p className="text-2xl font-extrabold text-ink">${balance.toFixed(2)}</p>
+                    </div>
+
+                    <form onSubmit={submitWallet} className="grid gap-4 sm:grid-cols-2">
+                        <AdminField label="Action" required>
+                            <AdminSelect
+                                value={walletForm.data.direction}
+                                onChange={(e) =>
+                                    walletForm.setData('direction', e.target.value as 'credit' | 'debit')
+                                }
+                            >
+                                <option value="credit">Add money (top-up)</option>
+                                <option value="debit">Deduct money</option>
+                            </AdminSelect>
+                        </AdminField>
+                        <AdminField label="Amount" required>
+                            <AdminInput
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                value={walletForm.data.amount}
+                                onChange={(e) => walletForm.setData('amount', Number(e.target.value))}
+                                required
+                            />
+                            <InputError message={walletForm.errors.amount} className="mt-1.5" />
+                        </AdminField>
+                        <div className="sm:col-span-2">
+                            <AdminField label="Note / payment reference">
+                                <AdminInput
+                                    value={walletForm.data.note}
+                                    onChange={(e) => walletForm.setData('note', e.target.value)}
+                                    placeholder="e.g. Cash received / bank transfer ID"
+                                />
+                                <InputError message={walletForm.errors.note} className="mt-1.5" />
+                            </AdminField>
+                        </div>
+                        <div className="sm:col-span-2">
+                            <button
+                                type="submit"
+                                disabled={walletForm.processing}
+                                className={`rounded-2xl px-5 py-2.5 text-sm font-extrabold text-white shadow-soft disabled:opacity-60 ${
+                                    walletForm.data.direction === 'credit'
+                                        ? 'bg-emerald-600 hover:bg-emerald-700'
+                                        : 'bg-rose-600 hover:bg-rose-700'
+                                }`}
+                            >
+                                {walletForm.data.direction === 'credit' ? 'Add to wallet' : 'Deduct from wallet'}
+                            </button>
+                        </div>
+                    </form>
+
+                    {recentTransactions.length > 0 && (
+                        <div className="mt-6 overflow-hidden rounded-2xl border border-brand/10">
+                            <div className="border-b border-brand/10 bg-canvas px-4 py-3 text-sm font-bold text-ink">
+                                Recent wallet activity
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full text-sm">
+                                    <thead className="text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                                        <tr>
+                                            <th className="px-4 py-2.5">Type</th>
+                                            <th className="px-4 py-2.5">Amount</th>
+                                            <th className="px-4 py-2.5">Balance</th>
+                                            <th className="px-4 py-2.5">When</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-brand/10">
+                                        {recentTransactions.map((t) => (
+                                            <tr key={t.id}>
+                                                <td className="px-4 py-2.5">
+                                                    <span className="chip bg-brand-soft text-brand">{t.type}</span>
+                                                    {t.description && (
+                                                        <p className="mt-1 max-w-xs truncate text-xs text-slate-400">
+                                                            {t.description}
+                                                        </p>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-2.5 font-semibold text-ink">
+                                                    ${Number(t.amount).toFixed(2)}
+                                                </td>
+                                                <td className="px-4 py-2.5 text-slate-600">
+                                                    ${Number(t.balance_after).toFixed(2)}
+                                                </td>
+                                                <td className="px-4 py-2.5 text-slate-500">
+                                                    {new Date(t.created_at).toLocaleString()}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </AdminFormSection>
             </div>
         </AdminLayout>
     );

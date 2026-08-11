@@ -142,3 +142,13 @@ export function IconRename(props: IconProps) {
         </svg>
     );
 }
+
+export function IconTopUp(props: IconProps) {
+    return (
+        <svg viewBox="0 0 24 24" width="18" height="18" {...base} {...props}>
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <path d="M2 10h20" />
+            <path d="M12 14v3M10.5 15.5h3" />
+        </svg>
+    );
+}

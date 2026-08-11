@@ -12,6 +12,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
 
 class UserController extends Controller
 {
@@ -75,14 +76,22 @@ class UserController extends Controller
             ->with('success', 'User created successfully.');
     }
 
-    public function edit(User $user): Response
+    public function edit(User $user, WalletService $wallets): Response
     {
         abort_if($user->isAdmin(), 403);
 
+        $wallet = $wallets->ensureWallet($user);
+
         $user->load('wallet');
+
+        $recentTransactions = $wallet->transactions()
+            ->latest()
+            ->limit(15)
+            ->get(['id', 'type', 'amount', 'balance_after', 'description', 'created_at']);
 
         return Inertia::render('Admin/Users/Edit', [
             'user' => $user,
+            'recentTransactions' => $recentTransactions,
         ]);
     }
 
@@ -143,6 +152,51 @@ class UserController extends Controller
         $user->update(['is_banned' => ! $user->is_banned]);
 
         return back()->with('success', $user->is_banned ? 'User banned.' : 'User unbanned.');
+    }
+
+    public function adjustWallet(Request $request, User $user, WalletService $wallets): RedirectResponse
+    {
+        abort_if($user->isAdmin(), 403);
+
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'min:0.01', 'max:100000'],
+            'direction' => ['required', Rule::in(['credit', 'debit'])],
+            'note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $amount = round((float) $data['amount'], 2);
+        $note = trim((string) ($data['note'] ?? ''));
+        $adminName = $request->user()->name;
+
+        $wallets->ensureWallet($user);
+
+        try {
+            if ($data['direction'] === 'credit') {
+                $description = $note !== ''
+                    ? "Manual top-up by admin ({$adminName}): {$note}"
+                    : "Manual top-up by admin ({$adminName})";
+
+                $wallets->credit($user, $amount, 'top_up', $description, null, [
+                    'source' => 'admin_manual',
+                    'admin_id' => $request->user()->id,
+                ]);
+
+                return back()->with('success', '$'.number_format($amount, 2).' added to wallet.');
+            }
+
+            $description = $note !== ''
+                ? "Manual debit by admin ({$adminName}): {$note}"
+                : "Manual debit by admin ({$adminName})";
+
+            $wallets->debit($user, $amount, 'admin_adjustment', $description, null, [
+                'source' => 'admin_manual',
+                'admin_id' => $request->user()->id,
+            ]);
+
+            return back()->with('success', '$'.number_format($amount, 2).' deducted from wallet.');
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     private function syncFemaleProfile(User $user): void

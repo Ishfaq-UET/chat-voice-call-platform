@@ -8,6 +8,7 @@ import {
     IconRename,
     IconSettings,
     IconShield,
+    IconTopUp,
     IconUsers,
     IconWallet,
 } from '@/Components/Admin/AdminIcons';
@@ -29,6 +30,7 @@ const adminLinks: {
     { href: 'admin.name-changes', label: 'Name changes', match: 'admin.name-changes*', icon: IconRename },
     { href: 'admin.chats', label: 'Chats & voices', match: 'admin.chats*', icon: IconChat },
     { href: 'admin.calls', label: 'Calls', match: 'admin.calls*', icon: IconPhone },
+    { href: 'admin.top-ups', label: 'Top-up requests', match: 'admin.top-ups*', icon: IconTopUp },
     { href: 'admin.transactions', label: 'Transactions', match: 'admin.transactions*', icon: IconLedger },
     { href: 'admin.withdrawals', label: 'Withdrawals', match: 'admin.withdrawals*', icon: IconWallet },
     { href: 'admin.settings', label: 'Settings', match: 'admin.settings*', icon: IconSettings },
