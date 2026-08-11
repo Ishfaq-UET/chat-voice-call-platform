@@ -7,20 +7,35 @@ use App\Models\Withdrawal;
 use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class WithdrawalController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $status = $request->input('status', 'pending');
+
         $withdrawals = Withdrawal::query()
-            ->with('user:id,name,email')
+            ->with(['user:id,name,email,phone,avatar', 'processor:id,name'])
+            ->when(
+                $status !== 'all',
+                fn ($q) => $q->where('status', $status),
+            )
             ->latest()
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         return Inertia::render('Admin/Withdrawals', [
             'withdrawals' => $withdrawals,
+            'filters' => ['status' => $status],
+            'counts' => [
+                'pending' => Withdrawal::query()->where('status', 'pending')->count(),
+                'paid' => Withdrawal::query()->where('status', 'paid')->count(),
+                'rejected' => Withdrawal::query()->where('status', 'rejected')->count(),
+                'all' => Withdrawal::query()->count(),
+            ],
         ]);
     }
 
@@ -28,14 +43,22 @@ class WithdrawalController extends Controller
     {
         abort_unless($withdrawal->status === 'pending', 422);
 
-        $withdrawal->update([
-            'status' => 'paid',
-            'processed_by' => $request->user()->id,
-            'processed_at' => now(),
-            'admin_notes' => $request->input('admin_notes'),
+        $data = $request->validate([
+            'payment_reference' => ['nullable', 'string', 'max:255'],
+            'payment_method' => ['nullable', Rule::in(['bank_transfer', 'cash', 'other'])],
+            'admin_notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        return back()->with('success', 'Withdrawal marked as paid.');
+        $withdrawal->update([
+            'status' => 'paid',
+            'payment_reference' => $data['payment_reference'] ?? null,
+            'payment_method' => $data['payment_method'] ?? 'bank_transfer',
+            'admin_notes' => $data['admin_notes'] ?? null,
+            'processed_by' => $request->user()->id,
+            'processed_at' => now(),
+        ]);
+
+        return back()->with('success', 'Withdrawal marked as manually paid.');
     }
 
     public function reject(Request $request, Withdrawal $withdrawal, WalletService $wallets): RedirectResponse
@@ -61,6 +84,6 @@ class WithdrawalController extends Controller
             $withdrawal,
         );
 
-        return back()->with('success', 'Withdrawal rejected and amount refunded.');
+        return back()->with('success', 'Withdrawal rejected and amount refunded to wallet.');
     }
 }

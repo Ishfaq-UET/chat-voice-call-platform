@@ -15,6 +15,8 @@ class Withdrawal extends Model
         'bank_account',
         'bank_holder',
         'admin_notes',
+        'payment_reference',
+        'payment_method',
         'processed_by',
         'processed_at',
     ];
