@@ -9,6 +9,7 @@ import { FormEvent, useState } from 'react';
 type CallRow = {
     id: number;
     status: string;
+    type?: string;
     rate_per_minute: number | string;
     duration_seconds: number | null;
     total_charged: number | string;
@@ -63,7 +64,7 @@ export default function AdminCallsIndex({
                         </>
                     }
                     title="Calls"
-                    description="Monitor ringing, active, and completed calls with duration and payments."
+                    description="Monitor audio and video calls with Agora channel, duration, and payments."
                     meta={`${summary.total} calls · ${summary.total_minutes} min billed · $${Number(summary.total_charged).toFixed(2)} charged`}
                 />
 
@@ -110,6 +111,7 @@ export default function AdminCallsIndex({
                             <thead>
                                 <tr className="border-b border-brand/10 bg-canvas text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                                     <th className="px-5 py-3.5">Call</th>
+                                    <th className="px-5 py-3.5">Type</th>
                                     <th className="px-5 py-3.5">Member</th>
                                     <th className="px-5 py-3.5">Creator</th>
                                     <th className="px-5 py-3.5">Duration</th>
@@ -122,6 +124,7 @@ export default function AdminCallsIndex({
                                 {calls.data.map((call) => (
                                     <tr key={call.id} className="hover:bg-brand-soft/40">
                                         <td className="px-5 py-4 font-semibold text-ink">#{call.id}</td>
+                                        <td className="px-5 py-4 capitalize text-slate-700">{call.type ?? 'audio'}</td>
                                         <td className="px-5 py-4">
                                             <div className="font-semibold text-ink">{call.male.name}</div>
                                             <div className="text-xs text-slate-500">{call.male.email}</div>
@@ -149,7 +152,7 @@ export default function AdminCallsIndex({
                                 ))}
                                 {calls.data.length === 0 && (
                                     <tr>
-                                        <td colSpan={7} className="px-5 py-12 text-center text-slate-500">
+                                        <td colSpan={8} className="px-5 py-12 text-center text-slate-500">
                                             No calls found.
                                         </td>
                                     </tr>

@@ -6,7 +6,7 @@ const faqs = [
     ['Why do I need to log in?', 'Discover shows personal profiles and paid features, so we require an account.'],
     ['How is this different from Omegle-style apps?', 'You choose verified creators, see prices, and pay from a wallet.'],
     ['How do creators get paid?', 'Earnings go to their wallet after commission; they request withdrawals.'],
-    ['Do you support video?', 'Not yet — text, voice notes, and live voice calls ship first.'],
+    ['Do you support video?', 'Yes — members can start audio or video calls with verified creators. Calls use Agora and are billed per connected minute.'],
 ];
 
 export default function Faq() {

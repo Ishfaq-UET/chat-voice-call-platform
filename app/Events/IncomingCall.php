@@ -35,6 +35,7 @@ class IncomingCall implements ShouldBroadcastNow
         return [
             'call' => [
                 'id' => $this->call->id,
+                'type' => $this->call->type,
                 'status' => $this->call->status,
                 'agora_channel' => $this->call->agora_channel,
                 'rate_per_minute' => $this->call->rate_per_minute,

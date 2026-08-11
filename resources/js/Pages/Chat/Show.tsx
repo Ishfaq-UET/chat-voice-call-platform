@@ -298,10 +298,20 @@ export default function ChatShow({
                                     <Link
                                         href={route('calls.start', otherUser.id)}
                                         method="post"
+                                        data={{ type: 'audio' }}
                                         as="button"
                                         className="flex w-full items-center justify-center rounded-2xl bg-ink py-2.5 text-sm font-bold text-white hover:bg-ink-soft"
                                     >
                                         Start voice call
+                                    </Link>
+                                    <Link
+                                        href={route('calls.start', otherUser.id)}
+                                        method="post"
+                                        data={{ type: 'video' }}
+                                        as="button"
+                                        className="flex w-full items-center justify-center rounded-2xl bg-brand py-2.5 text-sm font-bold text-white hover:bg-brand-deep"
+                                    >
+                                        Start video call
                                     </Link>
                                 </>
                             )}

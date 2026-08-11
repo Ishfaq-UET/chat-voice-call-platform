@@ -406,8 +406,10 @@ export default function WalletIndex({
                                     )}
                                 </div>
 
-                                {manualForm.errors.manual && (
-                                    <p className="text-sm text-rose-600">{manualForm.errors.manual}</p>
+                                {(manualForm.errors as Record<string, string>).manual && (
+                                    <p className="text-sm text-rose-600">
+                                        {(manualForm.errors as Record<string, string>).manual}
+                                    </p>
                                 )}
 
                                 <button

@@ -1,8 +1,9 @@
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
+import { formatAgoraMediaError, requestCallMediaPermission } from '@/lib/callMedia';
 import { PageProps } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useEffect, useState } from 'react';
 
 export default function AuthenticatedLayout({
@@ -15,21 +16,51 @@ export default function AuthenticatedLayout({
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [incomingCall, setIncomingCall] = useState<{
         id: number;
+        type?: 'audio' | 'video';
         male: { name: string };
     } | null>(null);
+    const [accepting, setAccepting] = useState(false);
+    const [incomingError, setIncomingError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user || user.role !== 'female') return;
 
         const channel = window.Echo.private(`App.Models.User.${user.id}`);
-        channel.listen('.call.incoming', (e: { call: { id: number; male: { name: string } } }) => {
-            setIncomingCall(e.call);
-        });
+        channel.listen(
+            '.call.incoming',
+            (e: { call: { id: number; type?: 'audio' | 'video'; male: { name: string } } }) => {
+                setIncomingError(null);
+                setIncomingCall(e.call);
+            },
+        );
 
         return () => {
             window.Echo.leave(`App.Models.User.${user.id}`);
         };
     }, [user]);
+
+    const acceptIncoming = async () => {
+        if (!incomingCall || accepting) return;
+        setAccepting(true);
+        setIncomingError(null);
+
+        try {
+            await requestCallMediaPermission(incomingCall.type === 'video');
+            const callId = incomingCall.id;
+            setIncomingCall(null);
+            router.post(
+                route('calls.accept', callId),
+                {},
+                {
+                    onFinish: () => setAccepting(false),
+                    onError: () => setAccepting(false),
+                },
+            );
+        } catch (err) {
+            setIncomingError(formatAgoraMediaError(err));
+            setAccepting(false);
+        }
+    };
 
     const homeHref =
         user.role === 'admin'
@@ -174,17 +205,23 @@ export default function AuthenticatedLayout({
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4 backdrop-blur-md">
                     <div className="card-soft w-full max-w-sm p-6 text-center">
                         <p className="text-lg font-extrabold text-brand">Incoming call</p>
-                        <p className="mt-2 text-slate-500">from {incomingCall.male.name}</p>
+                        <p className="mt-2 text-slate-500">
+                            {incomingCall.type === 'video' ? 'Video' : 'Voice'} from {incomingCall.male.name}
+                        </p>
+                        {incomingError && (
+                            <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-left text-sm text-amber-800">
+                                {incomingError}
+                            </p>
+                        )}
                         <div className="mt-6 flex justify-center gap-3">
-                            <Link
-                                href={route('calls.accept', incomingCall.id)}
-                                method="post"
-                                as="button"
-                                className="rounded-2xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-white"
-                                onClick={() => setIncomingCall(null)}
+                            <button
+                                type="button"
+                                disabled={accepting}
+                                onClick={() => void acceptIncoming()}
+                                className="rounded-2xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50"
                             >
-                                Accept
-                            </Link>
+                                {accepting ? 'Connecting…' : 'Accept'}
+                            </button>
                             <Link
                                 href={route('calls.reject', incomingCall.id)}
                                 method="post"

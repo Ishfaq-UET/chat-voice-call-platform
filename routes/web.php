@@ -58,6 +58,7 @@ Route::middleware(['auth', 'online'])->group(function () {
 
     Route::post('/calls/start/{female}', [CallController::class, 'start'])->name('calls.start');
     Route::get('/calls/{call}', [CallController::class, 'show'])->name('calls.show');
+    Route::get('/calls/{call}/token', [CallController::class, 'token'])->name('calls.token');
     Route::post('/calls/{call}/accept', [CallController::class, 'accept'])->name('calls.accept');
     Route::post('/calls/{call}/reject', [CallController::class, 'reject'])->name('calls.reject');
     Route::post('/calls/{call}/end', [CallController::class, 'end'])->name('calls.end');

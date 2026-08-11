@@ -232,10 +232,10 @@ export default function Home({
                                         </div>
                                     </div>
 
-                                    <div className="mt-4 flex gap-2">
+                                    <div className="mt-4 grid grid-cols-2 gap-2">
                                         <Link
                                             href={route('creators.show', female.id)}
-                                            className="flex-1 rounded-2xl border-2 border-brand/15 py-2.5 text-center text-sm font-bold text-brand hover:bg-brand-soft"
+                                            className="rounded-2xl border-2 border-brand/15 py-2.5 text-center text-sm font-bold text-brand hover:bg-brand-soft"
                                         >
                                             Profile
                                         </Link>
@@ -243,17 +243,27 @@ export default function Home({
                                             href={route('chat.start', female.id)}
                                             method="post"
                                             as="button"
-                                            className="flex-1 rounded-2xl bg-brand py-2.5 text-center text-sm font-bold text-white hover:bg-brand-deep"
+                                            className="rounded-2xl bg-brand py-2.5 text-center text-sm font-bold text-white hover:bg-brand-deep"
                                         >
                                             Chat
                                         </Link>
                                         <Link
                                             href={route('calls.start', female.id)}
                                             method="post"
+                                            data={{ type: 'audio' }}
                                             as="button"
-                                            className="flex-1 rounded-2xl bg-ink py-2.5 text-center text-sm font-bold text-white hover:bg-ink-soft"
+                                            className="rounded-2xl bg-ink py-2.5 text-center text-sm font-bold text-white hover:bg-ink-soft"
                                         >
-                                            Call
+                                            Audio
+                                        </Link>
+                                        <Link
+                                            href={route('calls.start', female.id)}
+                                            method="post"
+                                            data={{ type: 'video' }}
+                                            as="button"
+                                            className="rounded-2xl bg-brand py-2.5 text-center text-sm font-bold text-white hover:bg-brand-deep"
+                                        >
+                                            Video
                                         </Link>
                                     </div>
                                 </div>

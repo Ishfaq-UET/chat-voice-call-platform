@@ -6,12 +6,14 @@ import { Head, Link } from '@inertiajs/react';
 type CallDetail = {
     id: number;
     status: string;
+    type?: string;
     agora_channel?: string | null;
     rate_per_minute: number | string;
     duration_seconds: number | null;
     total_charged: number | string;
     commission_amount: number | string;
     started_at?: string | null;
+    answered_at?: string | null;
     ended_at?: string | null;
     created_at: string;
     male: { id: number; name: string; email: string; avatar_url?: string | null };
@@ -28,12 +30,14 @@ function formatDuration(seconds: number | null | undefined) {
 export default function AdminCallShow({ call }: PageProps<{ call: CallDetail }>) {
     const rows = [
         ['Status', call.status],
+        ['Type', call.type ?? 'audio'],
         ['Duration', formatDuration(call.duration_seconds)],
         ['Rate / minute', `$${Number(call.rate_per_minute).toFixed(2)}`],
         ['Total charged', `$${Number(call.total_charged ?? 0).toFixed(2)}`],
         ['Platform commission', `$${Number(call.commission_amount ?? 0).toFixed(2)}`],
         ['Creator earning', `$${(Number(call.total_charged ?? 0) - Number(call.commission_amount ?? 0)).toFixed(2)}`],
         ['Agora channel', call.agora_channel || '—'],
+        ['Answered', call.answered_at ? new Date(call.answered_at).toLocaleString() : '—'],
         ['Started', call.started_at ? new Date(call.started_at).toLocaleString() : '—'],
         ['Ended', call.ended_at ? new Date(call.ended_at).toLocaleString() : '—'],
         ['Created', new Date(call.created_at).toLocaleString()],

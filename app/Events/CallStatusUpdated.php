@@ -36,6 +36,7 @@ class CallStatusUpdated implements ShouldBroadcastNow
         return [
             'call' => [
                 'id' => $this->call->id,
+                'type' => $this->call->type,
                 'status' => $this->call->status,
                 'duration_seconds' => $this->call->duration_seconds,
                 'total_charged' => $this->call->total_charged,

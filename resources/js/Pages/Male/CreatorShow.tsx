@@ -123,10 +123,20 @@ export default function CreatorShow({
                                 <Link
                                     href={route('calls.start', creator.id)}
                                     method="post"
+                                    data={{ type: 'audio' }}
                                     as="button"
                                     className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white hover:bg-ink-soft"
                                 >
                                     Voice call
+                                </Link>
+                                <Link
+                                    href={route('calls.start', creator.id)}
+                                    method="post"
+                                    data={{ type: 'video' }}
+                                    as="button"
+                                    className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white hover:bg-brand-deep"
+                                >
+                                    Video call
                                 </Link>
                             </div>
                         </div>
