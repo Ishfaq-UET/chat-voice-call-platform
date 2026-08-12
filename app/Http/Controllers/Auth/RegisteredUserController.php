@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\FemaleProfile;
 use App\Models\User;
 use App\Services\WalletService;
+use App\Support\CountryCatalog;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -24,6 +26,7 @@ class RegisteredUserController extends Controller
 
         return Inertia::render('Auth/Register', [
             'preferredRole' => $role,
+            'countries' => CountryCatalog::optionsForSelect(),
         ]);
     }
 
@@ -37,13 +40,18 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|in:male,female',
+            'country_code' => ['required', 'string', 'size:2', CountryCatalog::countryCodeRule()],
         ]);
+
+        $countryCode = CountryCatalog::normalize($request->country_code);
+        $defaultPrices = CountryCatalog::defaultPrices($countryCode);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
+            'country_code' => $countryCode,
             'email_verified_at' => now(),
             'verification_status' => $request->role === 'female' ? 'unverified' : 'approved',
         ]);
@@ -53,9 +61,9 @@ class RegisteredUserController extends Controller
         if ($user->isFemale()) {
             FemaleProfile::query()->create([
                 'user_id' => $user->id,
-                'chat_price' => 1.00,
-                'voice_price' => 2.00,
-                'call_price_per_minute' => 5.00,
+                'chat_price' => $defaultPrices['chat'],
+                'voice_price' => $defaultPrices['voice'],
+                'call_price_per_minute' => $defaultPrices['call'],
             ]);
         }
 

@@ -1,3 +1,4 @@
+import CountryCombobox from '@/Components/CountryCombobox';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PasswordInput from '@/Components/PasswordInput';
@@ -7,13 +8,22 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-export default function Register({ preferredRole = 'male' }: { preferredRole?: 'male' | 'female' }) {
+type CountryOption = { code: string; name: string; label: string };
+
+export default function Register({
+    preferredRole = 'male',
+    countries = [],
+}: {
+    preferredRole?: 'male' | 'female';
+    countries?: CountryOption[];
+}) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
         role: preferredRole,
+        country_code: countries.find((c) => c.code === 'PK')?.code ?? countries[0]?.code ?? 'US',
     });
 
     const submit: FormEventHandler = (e) => {
@@ -36,7 +46,6 @@ export default function Register({ preferredRole = 'male' }: { preferredRole?: '
                         value={data.name}
                         className="mt-1 block w-full"
                         autoComplete="name"
-                        isFocused={true}
                         onChange={(e) => setData('name', e.target.value)}
                         required
                     />
@@ -81,6 +90,14 @@ export default function Register({ preferredRole = 'male' }: { preferredRole?: '
                     </div>
                     <InputError message={errors.role} className="mt-2" />
                 </div>
+
+                <CountryCombobox
+                    countries={countries}
+                    value={data.country_code}
+                    onChange={(code) => setData('country_code', code)}
+                    error={errors.country_code}
+                    hint={`${countries.length} countries · prices shown in local currency (₹, Rs, £, $, etc.)`}
+                />
 
                 <div>
                     <InputLabel htmlFor="password" value="Password" />

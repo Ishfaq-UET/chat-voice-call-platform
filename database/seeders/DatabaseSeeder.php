@@ -6,6 +6,7 @@ use App\Models\FemaleProfile;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\WalletService;
+use App\Support\CountryCatalog;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,6 +14,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        if (\Nnjeim\World\Models\Country::query()->count() === 0) {
+            $this->call(WorldSeeder::class);
+        }
+
+        CountryCatalog::flushCache();
+
         Setting::setValue('commission_percent', 20);
         Setting::setValue('min_withdrawal', 20);
 
@@ -36,6 +43,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Demo Male',
                 'password' => Hash::make('password'),
                 'role' => User::ROLE_MALE,
+                'country_code' => 'PK',
                 'email_verified_at' => now(),
                 'verification_status' => 'approved',
                 'bio' => 'Looking for good conversations.',
@@ -45,7 +53,7 @@ class DatabaseSeeder extends Seeder
         $wallets->ensureWallet($male);
         $maleWallet = $wallets->ensureWallet($male->fresh());
         if ((float) $maleWallet->balance < 50) {
-            $wallets->credit($male, 100, 'top_up', 'Seed balance');
+            $wallets->credit($male, 5000, 'top_up', 'Seed balance');
         }
 
         $creators = [
@@ -54,9 +62,10 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Ava Brooks',
                 'bio' => 'Late-night talks, soft voice notes, and unhurried calls. Tell me about your week.',
                 'online' => true,
-                'chat' => 1.50,
-                'voice' => 3.00,
-                'call' => 6.00,
+                'country' => 'PK',
+                'chat' => 100,
+                'voice' => 200,
+                'call' => 500,
             ],
             [
                 'email' => 'mia@gmail.com',
@@ -117,9 +126,10 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Zara Ahmed',
                 'bio' => 'Friendly check-ins and playful banter. Online evenings most nights.',
                 'online' => true,
-                'chat' => 1.10,
-                'voice' => 2.40,
-                'call' => 5.25,
+                'country' => 'PK',
+                'chat' => 110,
+                'voice' => 240,
+                'call' => 525,
             ],
             [
                 'email' => 'hannah@gmail.com',
@@ -135,9 +145,10 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Priya Nair',
                 'bio' => 'Soft-spoken calls and thoughtful messages. Slow evenings preferred.',
                 'online' => false,
-                'chat' => 1.60,
-                'voice' => 3.10,
-                'call' => 5.75,
+                'country' => 'IN',
+                'chat' => 50,
+                'voice' => 100,
+                'call' => 250,
             ],
             [
                 'email' => 'jade@gmail.com',
@@ -153,9 +164,10 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Claire Dubois',
                 'bio' => 'Paris evenings, cinema takes, and quiet company on longer calls.',
                 'online' => false,
-                'chat' => 2.50,
-                'voice' => 4.50,
-                'call' => 9.00,
+                'country' => 'GB',
+                'chat' => 1,
+                'voice' => 2,
+                'call' => 5,
             ],
         ];
 
@@ -169,6 +181,7 @@ class DatabaseSeeder extends Seeder
                     'email_verified_at' => now(),
                     'verification_status' => 'approved',
                     'bio' => $creator['bio'],
+                    'country_code' => $creator['country'] ?? 'US',
                     'avatar' => 'https://i.pravatar.cc/600?u='.urlencode($creator['email']),
                     'online_at' => $creator['online'] ? now()->subSeconds($index * 7) : now()->subHours(5 + $index),
                 ],
@@ -185,6 +198,10 @@ class DatabaseSeeder extends Seeder
                     'bank_holder' => $creator['name'],
                 ],
             );
+        }
+
+        if (env('SEED_FEMALE_PROFILES', false)) {
+            $this->call(FemaleProfilesSeeder::class);
         }
     }
 }

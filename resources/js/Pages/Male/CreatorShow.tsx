@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { FemaleProfile, PageProps } from '@/types';
+import { formatMoney } from '@/lib/money';
+import { FemaleProfile, Market, PageProps } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 
 type Creator = {
@@ -17,7 +18,8 @@ type Creator = {
 export default function CreatorShow({
     creator,
     walletBalance,
-}: PageProps<{ creator: Creator; walletBalance: number }>) {
+    market,
+}: PageProps<{ creator: Creator; walletBalance: number; market: Market }>) {
     const profile = creator.female_profile;
 
     return (
@@ -27,7 +29,7 @@ export default function CreatorShow({
                     <Link href={route('home')} className="text-sm font-medium text-slate-500 hover:text-ink">
                         ← Back to Discover
                     </Link>
-                    <p className="text-sm font-semibold text-coral">Balance ${Number(walletBalance).toFixed(2)}</p>
+                    <p className="text-sm font-semibold text-coral">Balance {formatMoney(walletBalance, market)}</p>
                 </div>
             }
         >
@@ -85,7 +87,7 @@ export default function CreatorShow({
                                                 {label}
                                             </p>
                                             <p className="mt-1 font-display text-xl font-bold text-ink">
-                                                ${Number(price ?? 0).toFixed(2)}
+                                                {formatMoney(price ?? 0, market)}
                                             </p>
                                         </div>
                                     ))}

@@ -1,7 +1,8 @@
 import InputError from '@/Components/InputError';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { formatMoney } from '@/lib/money';
 import { PageProps, User } from '@/types';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 
 type ChatMessage = {
@@ -48,6 +49,7 @@ export default function ChatShow({
     walletBalance: number;
 }>) {
     const user = auth.user!;
+    const market = usePage<PageProps>().props.market;
     const [messages, setMessages] = useState(initialMessages.data);
     const bottomRef = useRef<HTMLDivElement>(null);
     const mediaRecorder = useRef<MediaRecorder | null>(null);
@@ -274,15 +276,15 @@ export default function ChatShow({
                         <div className="mt-5 grid grid-cols-3 gap-2 rounded-3xl bg-canvas p-3 text-center">
                             <div>
                                 <p className="text-[10px] font-bold uppercase text-slate-400">Chat</p>
-                                <p className="text-sm font-extrabold text-ink">${prices.chat.toFixed(2)}</p>
+                                <p className="text-sm font-extrabold text-ink">{formatMoney(prices.chat, market)}</p>
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold uppercase text-slate-400">Voice</p>
-                                <p className="text-sm font-extrabold text-ink">${prices.voice.toFixed(2)}</p>
+                                <p className="text-sm font-extrabold text-ink">{formatMoney(prices.voice, market)}</p>
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold uppercase text-slate-400">Call</p>
-                                <p className="text-sm font-extrabold text-ink">${prices.call.toFixed(2)}</p>
+                                <p className="text-sm font-extrabold text-ink">{formatMoney(prices.call, market)}</p>
                             </div>
                         </div>
 
@@ -316,7 +318,7 @@ export default function ChatShow({
                                 </>
                             )}
                             <p className="pt-1 text-center text-xs font-semibold text-slate-400">
-                                Your balance ${Number(walletBalance).toFixed(2)}
+                                Your balance {formatMoney(walletBalance, market)}
                             </p>
                         </div>
                     </div>
@@ -341,7 +343,7 @@ export default function ChatShow({
                         <div className="min-w-0 flex-1">
                             <p className="truncate font-extrabold text-ink">{otherUser.name}</p>
                             <p className="truncate text-xs font-medium text-slate-500">
-                                {otherUser.is_online ? 'Active now' : 'Offline'} · Chat ${prices.chat.toFixed(2)}
+                                {otherUser.is_online ? 'Active now' : 'Offline'} · Chat {formatMoney(prices.chat, market)}
                             </p>
                         </div>
                         <Link
@@ -413,7 +415,7 @@ export default function ChatShow({
                                             <span>{formatTime(m.created_at)}</span>
                                             {mine && Number(m.amount_charged) > 0 && (
                                                 <span className="rounded-full bg-brand-soft px-1.5 py-0.5 text-brand">
-                                                    −${Number(m.amount_charged).toFixed(2)}
+                                                    −{formatMoney(m.amount_charged ?? 0, market)}
                                                 </span>
                                             )}
                                         </div>
@@ -503,7 +505,7 @@ export default function ChatShow({
                             </button>
                         </div>
                         <p className="mt-2 text-center text-[11px] font-medium text-slate-400">
-                            Text / photo ${prices.chat.toFixed(2)} · Voice note ${prices.voice.toFixed(2)}
+                            Text / photo {formatMoney(prices.chat, market)} · Voice note {formatMoney(prices.voice, market)}
                         </p>
                     </form>
                 </section>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\WalletService;
+use App\Support\CountryCatalog;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,6 +20,7 @@ class CreatorController extends Controller
         // Members only see approved creators; admins can preview pending ones too.
         if ($viewer->isMale()) {
             abort_unless($female->isVerifiedFemale(), 404);
+            abort_unless($female->sameCountryAs($viewer), 404);
         }
 
         $female->load('femaleProfile');
@@ -35,6 +37,7 @@ class CreatorController extends Controller
                 'created_at' => $female->created_at?->toDateString(),
                 'female_profile' => $female->femaleProfile,
             ],
+            'market' => CountryCatalog::marketFor($viewer->country_code),
             'walletBalance' => (float) app(WalletService::class)->ensureWallet($viewer)->balance,
             'adminPreview' => $viewer->isAdmin(),
         ]);

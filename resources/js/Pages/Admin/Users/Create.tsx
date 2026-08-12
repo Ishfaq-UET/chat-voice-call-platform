@@ -1,5 +1,6 @@
 import AdminFormSection from '@/Components/Admin/AdminFormSection';
 import { AdminField, AdminInput, AdminSelect } from '@/Components/Admin/AdminField';
+import CountryCombobox from '@/Components/CountryCombobox';
 import { IconArrowLeft, IconUserPlus } from '@/Components/Admin/AdminIcons';
 import InputError from '@/Components/InputError';
 import AdminLayout from '@/Layouts/AdminLayout';
@@ -7,7 +8,11 @@ import { PageProps } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-export default function AdminUsersCreate(_props: PageProps) {
+type CountryOption = { code: string; name: string; label: string };
+
+export default function AdminUsersCreate({
+    countries = [],
+}: PageProps<{ countries?: CountryOption[] }>) {
     const form = useForm({
         name: '',
         email: '',
@@ -15,6 +20,7 @@ export default function AdminUsersCreate(_props: PageProps) {
         password: '',
         password_confirmation: '',
         role: 'male',
+        country_code: countries[0]?.code ?? 'US',
         bio: '',
         is_banned: false,
     });
@@ -89,6 +95,14 @@ export default function AdminUsersCreate(_props: PageProps) {
                                 </AdminSelect>
                                 <InputError message={form.errors.role} className="mt-1.5" />
                             </AdminField>
+                            <div className="sm:col-span-2">
+                                <CountryCombobox
+                                    countries={countries}
+                                    value={form.data.country_code}
+                                    onChange={(code) => form.setData('country_code', code)}
+                                    error={form.errors.country_code}
+                                />
+                            </div>
                             <AdminField label="Password" required>
                                 <AdminInput
                                     type="password"

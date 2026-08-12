@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { formatMoney } from '@/lib/money';
 import { PageProps, Paginated } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
@@ -56,6 +57,7 @@ export default function WalletIndex({
     hasPendingManual?: boolean;
 }>) {
     const flash = usePage<PageProps>().props.flash;
+    const market = usePage<PageProps>().props.market;
     const [preview, setPreview] = useState<string | null>(null);
     const [method, setMethod] = useState<PaymentMethod | null>(null);
 
@@ -161,7 +163,7 @@ export default function WalletIndex({
 
                 <div className="card-soft p-5 sm:p-6">
                     <p className="text-sm font-medium text-slate-500">Current balance</p>
-                    <p className="mt-1 text-3xl font-extrabold text-ink">${Number(balance).toFixed(2)}</p>
+                    <p className="mt-1 text-3xl font-extrabold text-ink">{formatMoney(balance, market)}</p>
                 </div>
 
                 <div className="card-soft p-5 sm:p-6">
@@ -433,7 +435,7 @@ export default function WalletIndex({
                             {manualRequests.map((r) => (
                                 <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
                                     <div>
-                                        <p className="font-bold text-ink">${Number(r.amount).toFixed(2)}</p>
+                                        <p className="font-bold text-ink">{formatMoney(r.amount, market)}</p>
                                         <p className="text-xs text-slate-500">
                                             {r.payment_channel_label ?? r.payment_channel ?? 'Manual'} · TID:{' '}
                                             {r.transaction_id}
@@ -477,8 +479,8 @@ export default function WalletIndex({
                                 {transactions.data.map((tx) => (
                                     <tr key={tx.id}>
                                         <td className="px-5 py-3 capitalize">{tx.type.replace('_', ' ')}</td>
-                                        <td className="px-5 py-3 font-semibold">${Number(tx.amount).toFixed(2)}</td>
-                                        <td className="px-5 py-3">${Number(tx.balance_after).toFixed(2)}</td>
+                                        <td className="px-5 py-3 font-semibold">{formatMoney(tx.amount, market)}</td>
+                                        <td className="px-5 py-3">{formatMoney(tx.balance_after, market)}</td>
                                         <td className="px-5 py-3 text-slate-500">
                                             {new Date(tx.created_at).toLocaleString()}
                                         </td>

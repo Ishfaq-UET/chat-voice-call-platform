@@ -17,6 +17,7 @@ cp .env.example .env   # if needed
 php artisan key:generate
 touch database/database.sqlite
 php artisan migrate --seed
+php artisan db:seed --class=WorldSeeder   # if countries table is empty
 php artisan storage:link
 npm install --legacy-peer-deps
 npm run build

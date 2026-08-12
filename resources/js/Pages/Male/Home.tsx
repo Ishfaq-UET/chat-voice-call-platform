@@ -1,6 +1,7 @@
 import Pagination from '@/Components/Pagination';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { FemaleProfile, PageProps, Paginated, User } from '@/types';
+import { formatMoney } from '@/lib/money';
+import { FemaleProfile, Market, PageProps, Paginated, User } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 
@@ -21,6 +22,7 @@ export default function Home({
     filters,
     walletBalance,
     stats,
+    market,
 }: PageProps<{
     females: FemalePage;
     filters: {
@@ -32,6 +34,7 @@ export default function Home({
     };
     walletBalance: number;
     stats: { total: number; online: number };
+    market: Market;
 }>) {
     const [q, setQ] = useState(filters.q ?? '');
     const [online, setOnline] = useState(!!filters.online);
@@ -63,8 +66,8 @@ export default function Home({
                     <div>
                         <h1 className="text-3xl font-extrabold text-ink">Discover creators</h1>
                         <p className="mt-1 text-sm font-medium text-slate-500">
-                            {stats.online} online · {stats.total} verified · Balance $
-                            {Number(walletBalance).toFixed(2)}
+                            {stats.online} online · {stats.total} in {market.country_name} · Balance{' '}
+                            {formatMoney(walletBalance, market)}
                         </p>
                     </div>
                     <Link href={route('wallet.index')} className="btn-brand !py-2.5">
@@ -135,11 +138,13 @@ export default function Home({
                     <div className="rounded-[28px] bg-skyish p-4 sm:p-5">
                         <div className="flex flex-wrap items-end gap-4">
                             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-sky-600 shadow-sm">
-                                $
+                                {market.currency_symbol}
                             </div>
                             <div className="grid flex-1 gap-3 sm:grid-cols-3">
                                 <div>
-                                    <label className="text-xs font-bold text-slate-500">Max chat $</label>
+                                    <label className="text-xs font-bold text-slate-500">
+                                        Max chat ({market.currency_code})
+                                    </label>
                                     <input
                                         type="number"
                                         min="0"
@@ -150,7 +155,9 @@ export default function Home({
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-slate-500">Max call $/min</label>
+                                    <label className="text-xs font-bold text-slate-500">
+                                        Max call ({market.currency_code}/min)
+                                    </label>
                                     <input
                                         type="number"
                                         min="0"
@@ -211,7 +218,7 @@ export default function Home({
                                                 Chat
                                             </p>
                                             <p className="font-extrabold text-ink">
-                                                ${Number(profile?.chat_price ?? 0).toFixed(2)}
+                                                {formatMoney(profile?.chat_price ?? 0, market)}
                                             </p>
                                         </div>
                                         <div>
@@ -219,7 +226,7 @@ export default function Home({
                                                 Voice
                                             </p>
                                             <p className="font-extrabold text-ink">
-                                                ${Number(profile?.voice_price ?? 0).toFixed(2)}
+                                                {formatMoney(profile?.voice_price ?? 0, market)}
                                             </p>
                                         </div>
                                         <div>
@@ -227,7 +234,7 @@ export default function Home({
                                                 Call
                                             </p>
                                             <p className="font-extrabold text-ink">
-                                                ${Number(profile?.call_price_per_minute ?? 0).toFixed(2)}
+                                                {formatMoney(profile?.call_price_per_minute ?? 0, market)}
                                             </p>
                                         </div>
                                     </div>
@@ -275,7 +282,7 @@ export default function Home({
                 {females.data.length === 0 && (
                     <div className="card-soft py-16 text-center">
                         <p className="text-xl font-extrabold text-ink">No creators found</p>
-                        <p className="mt-2 text-sm text-slate-500">Try clearing filters.</p>
+                        <p className="mt-2 text-sm text-slate-500">Try clearing filters or check back later.</p>
                     </div>
                 )}
 

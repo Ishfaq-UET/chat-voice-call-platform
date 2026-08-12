@@ -10,6 +10,15 @@ export interface User {
     email_verified_at?: string;
     bio?: string | null;
     phone?: string | null;
+    country_code?: string;
+}
+
+export interface Market {
+    country_code: string;
+    country_name: string;
+    currency_code: string;
+    currency_symbol: string;
+    currency_symbol_first?: boolean;
 }
 
 export interface FemaleProfile {
@@ -46,4 +55,5 @@ export type PageProps<
         error?: string | null;
     };
     walletBalance?: number | null;
+    market?: Market | null;
 };

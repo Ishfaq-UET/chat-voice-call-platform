@@ -28,6 +28,7 @@ class User extends Authenticatable
         'avatar',
         'bio',
         'phone',
+        'country_code',
         'verification_status',
         'online_at',
         'is_banned',
@@ -89,6 +90,16 @@ class User extends Authenticatable
     public function isVerifiedFemale(): bool
     {
         return $this->isFemale() && $this->verification_status === 'approved';
+    }
+
+    public function sameCountryAs(User $other): bool
+    {
+        return strtoupper((string) $this->country_code) === strtoupper((string) $other->country_code);
+    }
+
+    public function scopeInCountry($query, ?string $countryCode)
+    {
+        return $query->where('country_code', strtoupper((string) $countryCode));
     }
 
     public function femaleProfile(): HasOne

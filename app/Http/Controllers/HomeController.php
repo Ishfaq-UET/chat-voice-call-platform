@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\WalletService;
+use App\Support\CountryCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -27,11 +28,15 @@ class HomeController extends Controller
             return redirect()->route('female.dashboard');
         }
 
-        $query = User::query()
+        $countryCode = CountryCatalog::normalize($user->country_code);
+
+        $baseQuery = User::query()
             ->where('role', User::ROLE_FEMALE)
             ->where('verification_status', 'approved')
             ->where('is_banned', false)
-            ->with('femaleProfile');
+            ->where('country_code', $countryCode);
+
+        $query = (clone $baseQuery)->with('femaleProfile');
 
         if ($request->boolean('online')) {
             $query->where('online_at', '>=', now()->subMinutes(2));
@@ -73,6 +78,7 @@ class HomeController extends Controller
 
         return Inertia::render('Male/Home', [
             'females' => $females,
+            'market' => CountryCatalog::marketFor($countryCode),
             'filters' => [
                 'online' => $request->boolean('online'),
                 'q' => $request->input('q', ''),
@@ -82,15 +88,8 @@ class HomeController extends Controller
             ],
             'walletBalance' => (float) app(WalletService::class)->ensureWallet($user)->balance,
             'stats' => [
-                'total' => User::query()
-                    ->where('role', User::ROLE_FEMALE)
-                    ->where('verification_status', 'approved')
-                    ->where('is_banned', false)
-                    ->count(),
-                'online' => User::query()
-                    ->where('role', User::ROLE_FEMALE)
-                    ->where('verification_status', 'approved')
-                    ->where('is_banned', false)
+                'total' => (clone $baseQuery)->count(),
+                'online' => (clone $baseQuery)
                     ->where('online_at', '>=', now()->subMinutes(2))
                     ->count(),
             ],

@@ -25,6 +25,7 @@ class CallController extends Controller
         $male = $request->user();
         abort_unless($male->isMale(), 403);
         abort_unless($female->isVerifiedFemale(), 404);
+        abort_unless($female->sameCountryAs($male), 404);
 
         $data = $request->validate([
             'type' => ['nullable', Rule::in([Call::TYPE_AUDIO, Call::TYPE_VIDEO])],

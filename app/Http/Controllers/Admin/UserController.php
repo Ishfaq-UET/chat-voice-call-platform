@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FemaleProfile;
 use App\Models\User;
 use App\Services\WalletService;
+use App\Support\CountryCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -41,7 +42,9 @@ class UserController extends Controller
 
     public function create(): Response
     {
-        return Inertia::render('Admin/Users/Create');
+        return Inertia::render('Admin/Users/Create', [
+            'countries' => CountryCatalog::optionsForSelect(),
+        ]);
     }
 
     public function store(Request $request, WalletService $wallets): RedirectResponse
@@ -52,6 +55,7 @@ class UserController extends Controller
             'phone' => ['nullable', 'string', 'max:40'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'role' => ['required', Rule::in(['male', 'female'])],
+            'country_code' => ['required', 'string', 'size:2', CountryCatalog::countryCodeRule()],
             'bio' => ['nullable', 'string', 'max:2000'],
             'is_banned' => ['sometimes', 'boolean'],
         ]);
@@ -62,6 +66,7 @@ class UserController extends Controller
             'phone' => $validated['phone'] ?? null,
             'password' => $validated['password'],
             'role' => $validated['role'],
+            'country_code' => CountryCatalog::normalize($validated['country_code']),
             'bio' => $validated['bio'] ?? null,
             'email_verified_at' => now(),
             'verification_status' => $validated['role'] === 'female' ? 'unverified' : 'approved',
@@ -208,9 +213,9 @@ class UserController extends Controller
         FemaleProfile::query()->firstOrCreate(
             ['user_id' => $user->id],
             [
-                'chat_price' => 1.00,
-                'voice_price' => 2.00,
-                'call_price_per_minute' => 5.00,
+                'chat_price' => CountryCatalog::defaultPrices($user->country_code)['chat'],
+                'voice_price' => CountryCatalog::defaultPrices($user->country_code)['voice'],
+                'call_price_per_minute' => CountryCatalog::defaultPrices($user->country_code)['call'],
             ],
         );
     }

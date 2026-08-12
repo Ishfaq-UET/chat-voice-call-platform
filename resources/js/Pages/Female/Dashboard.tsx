@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import SelfieCameraCapture from '@/Components/SelfieCameraCapture';
+import { formatMoney } from '@/lib/money';
 import { FemaleProfile, PageProps } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler, useMemo, useState } from 'react';
@@ -20,6 +21,7 @@ export default function FemaleDashboard({
     walletBalance: number;
 }>) {
     const flash = usePage<PageProps>().props.flash;
+    const market = usePage<PageProps>().props.market;
     const [preview, setPreview] = useState<string | null>(null);
 
     const statusLabel = useMemo(() => {
@@ -122,7 +124,7 @@ export default function FemaleDashboard({
                 <div className="card-soft p-5">
                     <p className="text-sm font-medium text-slate-500">Wallet balance</p>
                     <p className="mt-1 text-3xl font-extrabold text-ink">
-                        ${Number(walletBalance).toFixed(2)}
+                        {formatMoney(walletBalance, market)}
                     </p>
                     <p className="mt-2 text-sm text-slate-600">
                         Verification:{' '}
@@ -248,7 +250,7 @@ export default function FemaleDashboard({
                 )}
 
                 <form onSubmit={submitPricing} className="card-soft p-5">
-                    <h3 className="text-lg font-extrabold text-ink">Pricing</h3>
+                    <h3 className="text-lg font-extrabold text-ink">Pricing ({market?.currency_code ?? 'USD'})</h3>
                     <div className="mt-4 grid gap-4 sm:grid-cols-3">
                         {([
                             ['chat_price', 'Chat message'],
@@ -256,7 +258,9 @@ export default function FemaleDashboard({
                             ['call_price_per_minute', 'Call / minute'],
                         ] as const).map(([key, label]) => (
                             <div key={key}>
-                                <label className="text-sm font-bold text-slate-700">{label}</label>
+                                <label className="text-sm font-bold text-slate-700">
+                                    {label} ({market?.currency_symbol ?? '$'})
+                                </label>
                                 <input
                                     type="number"
                                     step="0.01"

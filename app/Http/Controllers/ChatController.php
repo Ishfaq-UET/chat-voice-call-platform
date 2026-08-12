@@ -39,6 +39,7 @@ class ChatController extends Controller
         $male = $request->user();
         abort_unless($male->isMale(), 403);
         abort_unless($female->isVerifiedFemale(), 404);
+        abort_unless($female->sameCountryAs($male), 404);
 
         $conversation = Conversation::query()->firstOrCreate([
             'male_id' => $male->id,

@@ -1,7 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatAgoraMediaError, mediaSupportError, requestCallMediaPermission } from '@/lib/callMedia';
+import { formatMoney } from '@/lib/money';
 import { PageProps, User } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import AgoraRTC, {
     IAgoraRTCClient,
     ICameraVideoTrack,
@@ -38,6 +39,7 @@ export default function CallShow({
     agora: AgoraProps;
 }>) {
     const user = auth.user!;
+    const market = usePage<PageProps>().props.market;
     const other = user.role === 'male' ? call.female : call.male;
     const isVideo = call.type === 'video';
 
@@ -298,7 +300,7 @@ export default function CallShow({
                     </>
                 )}
 
-                <p className="mt-3 text-sm text-slate-500">${Number(call.rate_per_minute).toFixed(2)} / minute</p>
+                <p className="mt-3 text-sm text-slate-500">{formatMoney(call.rate_per_minute, market)} / minute</p>
 
                 {joinError && (
                     <p className="mt-4 max-w-lg rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">{joinError}</p>

@@ -19,6 +19,7 @@ export default function UpdateProfileInformation({
     className?: string;
 }) {
     const user = usePage<PageProps>().props.auth.user!;
+    const market = usePage<PageProps>().props.market;
     const [preview, setPreview] = useState<string | null>(null);
 
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
@@ -117,6 +118,15 @@ export default function UpdateProfileInformation({
                     Update your email anytime. Display name changes require admin approval.
                 </p>
             </header>
+
+            {user.country_code && (
+                <p className="mt-4 text-sm text-slate-600">
+                    Country:{' '}
+                    <span className="font-bold text-ink">{market?.country_name ?? user.country_code}</span>
+                    {' · '}
+                    Prices and wallet use {market?.currency_code ?? 'USD'}.
+                </p>
+            )}
 
             {pendingNameChange && (
                 <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">

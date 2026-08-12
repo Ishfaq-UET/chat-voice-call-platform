@@ -2,6 +2,7 @@ import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { formatAgoraMediaError, requestCallMediaPermission } from '@/lib/callMedia';
+import { formatMoney } from '@/lib/money';
 import { PageProps } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useEffect, useState } from 'react';
@@ -13,6 +14,7 @@ export default function AuthenticatedLayout({
     const user = usePage<PageProps>().props.auth.user!;
     const flash = usePage<PageProps>().props.flash;
     const walletBalance = usePage<PageProps>().props.walletBalance;
+    const market = usePage<PageProps>().props.market;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [incomingCall, setIncomingCall] = useState<{
         id: number;
@@ -129,7 +131,7 @@ export default function AuthenticatedLayout({
                                     href={user.role === 'male' ? route('wallet.index') : route('female.withdrawals')}
                                     className="rounded-2xl bg-brand-soft px-3 py-1.5 text-sm font-extrabold text-brand"
                                 >
-                                    ${Number(walletBalance).toFixed(2)}
+                                    {formatMoney(walletBalance ?? 0, market)}
                                 </Link>
                             )}
                             <Dropdown>
