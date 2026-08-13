@@ -1,5 +1,6 @@
 import Dropdown from '@/Components/Dropdown';
 import {
+    IconBanner,
     IconChat,
     IconChevronDown,
     IconLedger,
@@ -34,6 +35,7 @@ const adminLinks: {
     { href: 'admin.top-ups', label: 'Top-up requests', match: 'admin.top-ups*', icon: IconTopUp },
     { href: 'admin.transactions', label: 'Transactions', match: 'admin.transactions*', icon: IconLedger },
     { href: 'admin.withdrawals', label: 'Withdrawals', match: 'admin.withdrawals*', icon: IconWallet },
+    { href: 'admin.banners', label: 'Banners', match: 'admin.banners*', icon: IconBanner },
     { href: 'admin.settings', label: 'Settings', match: 'admin.settings*', icon: IconSettings },
 ];
 

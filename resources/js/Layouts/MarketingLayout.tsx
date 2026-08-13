@@ -1,4 +1,5 @@
 import SiteLogo from '@/Components/SiteLogo';
+import WelcomeBanner from '@/Components/WelcomeBanner';
 import { PageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren } from 'react';
@@ -129,6 +130,7 @@ export function SiteHeader() {
 export default function MarketingLayout({ children }: PropsWithChildren) {
     return (
         <div className="min-h-screen bg-white text-ink">
+            <WelcomeBanner />
             <div className="bg-brand px-4 py-2 text-center text-sm font-semibold text-white">
                 Create an account to unlock Discover, chat, and voice calls.{' '}
                 <Link href={route('register')} className="underline underline-offset-2">

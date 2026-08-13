@@ -1,4 +1,5 @@
 import SiteLogo from '@/Components/SiteLogo';
+import WelcomeBanner from '@/Components/WelcomeBanner';
 import { PropsWithChildren } from 'react';
 
 export default function Guest({
@@ -8,6 +9,7 @@ export default function Guest({
 }: PropsWithChildren<{ title?: string; subtitle?: string }>) {
     return (
         <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-gradient-to-b from-lilac via-white to-canvas px-4 py-10">
+            <WelcomeBanner />
             <div className="absolute inset-x-0 top-0 bg-brand px-4 py-2 text-center text-xs font-bold text-white">
                 Create an account to save chats, wallets, and call history
             </div>

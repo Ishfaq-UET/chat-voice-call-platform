@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Services\WalletService;
 use App\Models\Setting;
+use App\Models\SiteBanner;
 use App\Support\CountryCatalog;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -52,6 +53,7 @@ class HandleInertiaRequests extends Middleware
                 'favicon_url' => Setting::faviconUrl(),
                 'app_name' => config('app.name', 'Wyak Dating'),
             ],
+            'siteBanner' => fn () => SiteBanner::resolveForRequest($request),
         ];
     }
 }

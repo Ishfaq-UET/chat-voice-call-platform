@@ -2,6 +2,7 @@ import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import SiteLogo from '@/Components/SiteLogo';
+import WelcomeBanner from '@/Components/WelcomeBanner';
 import { formatAgoraMediaError, requestCallMediaPermission } from '@/lib/callMedia';
 import { formatMoney } from '@/lib/money';
 import { PageProps } from '@/types';
@@ -74,6 +75,7 @@ export default function AuthenticatedLayout({
 
     return (
         <div className="min-h-screen bg-canvas">
+            <WelcomeBanner />
             <div className="bg-brand px-4 py-2 text-center text-xs font-bold text-white sm:text-sm">
                 Be respectful · Follow community guidelines · 18+ only
             </div>

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ConversationController as AdminConversationContro
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ManualTopUpController as AdminManualTopUpController;
 use App\Http\Controllers\Admin\NameChangeController as AdminNameChangeController;
+use App\Http\Controllers\Admin\BannerController as AdminBannerController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -110,6 +111,14 @@ Route::middleware(['auth', 'online'])->group(function () {
         Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals');
         Route::post('/withdrawals/{withdrawal}/approve', [AdminWithdrawalController::class, 'approve'])->name('withdrawals.approve');
         Route::post('/withdrawals/{withdrawal}/reject', [AdminWithdrawalController::class, 'reject'])->name('withdrawals.reject');
+
+        Route::get('/banners', [AdminBannerController::class, 'index'])->name('banners');
+        Route::get('/banners/create', [AdminBannerController::class, 'create'])->name('banners.create');
+        Route::post('/banners', [AdminBannerController::class, 'store'])->name('banners.store');
+        Route::get('/banners/{banner}/edit', [AdminBannerController::class, 'edit'])->name('banners.edit');
+        Route::put('/banners/{banner}', [AdminBannerController::class, 'update'])->name('banners.update');
+        Route::delete('/banners/{banner}', [AdminBannerController::class, 'destroy'])->name('banners.destroy');
+        Route::post('/banners/{banner}/toggle', [AdminBannerController::class, 'toggle'])->name('banners.toggle');
 
         Route::get('/settings', [AdminSettingsController::class, 'edit'])->name('settings');
         Route::post('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');

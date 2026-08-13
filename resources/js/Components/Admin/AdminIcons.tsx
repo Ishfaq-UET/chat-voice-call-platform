@@ -152,3 +152,12 @@ export function IconTopUp(props: IconProps) {
         </svg>
     );
 }
+
+export function IconBanner(props: IconProps) {
+    return (
+        <svg viewBox="0 0 24 24" width="18" height="18" {...base} {...props}>
+            <rect x="3" y="5" width="18" height="12" rx="2" />
+            <path d="M7 17v2M17 17v2M8 9h8M8 13h5" />
+        </svg>
+    );
+}

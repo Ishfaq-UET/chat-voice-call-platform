@@ -61,4 +61,14 @@ export type PageProps<
         favicon_url: string | null;
         app_name: string;
     };
+    siteBanner?: {
+        id: number;
+        title: string | null;
+        message: string;
+        image_url: string | null;
+        link_url: string | null;
+        link_label: string | null;
+        country_code: string | null;
+        version: string | number;
+    } | null;
 };
