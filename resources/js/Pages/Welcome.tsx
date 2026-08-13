@@ -79,7 +79,7 @@ const blogPosts = [
         slug: 'setting-rates-that-convert',
         tag: 'Creators',
         title: 'Set rates that convert without burning out',
-        excerpt: 'Practical pricing tips for new creators on ChatVoiceCall.',
+        excerpt: 'Practical pricing tips for new creators on Wyak Dating.',
         tone: 'bg-skyish',
     },
 ];

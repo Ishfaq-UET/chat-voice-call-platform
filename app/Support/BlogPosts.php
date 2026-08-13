@@ -16,12 +16,12 @@ class BlogPosts
                 'title' => 'How face verification protects both sides',
                 'excerpt' => 'Why creators verify once, and how members benefit from a trusted discover list.',
                 'date' => 'July 10, 2026',
-                'author' => 'Team ChatVoiceCall',
+                'author' => 'Team Wyak',
                 'tone' => 'bg-lilac',
                 'sections' => [
                     [
                         'heading' => 'Why random chat apps feel risky',
-                        'body' => 'Anonymous roulette apps make it easy to meet someone — and just as easy to meet a fake profile. No identity checks, no rates, no accountability. ChatVoiceCall flips that model: creators verify before they appear in Discover, and members only pay after they choose who to talk to.',
+                        'body' => 'Anonymous roulette apps make it easy to meet someone — and just as easy to meet a fake profile. No identity checks, no rates, no accountability. Wyak Dating flips that model: creators verify before they appear in Discover, and members only pay after they choose who to talk to.',
                     ],
                     [
                         'heading' => 'What face verification means here',
@@ -49,7 +49,7 @@ class BlogPosts
                 'title' => 'How wallet pricing works for chat and calls',
                 'excerpt' => 'Per-message, voice note, and per-minute call billing — explained simply.',
                 'date' => 'July 8, 2026',
-                'author' => 'Team ChatVoiceCall',
+                'author' => 'Team Wyak',
                 'tone' => 'bg-mint',
                 'sections' => [
                     [
@@ -80,9 +80,9 @@ class BlogPosts
                 'slug' => 'setting-rates-that-convert',
                 'tag' => 'Creators',
                 'title' => 'Setting rates that convert without burning out',
-                'excerpt' => 'Practical pricing tips for new creators on ChatVoiceCall.',
+                'excerpt' => 'Practical pricing tips for new creators on Wyak Dating.',
                 'date' => 'July 2, 2026',
-                'author' => 'Team ChatVoiceCall',
+                'author' => 'Team Wyak',
                 'tone' => 'bg-skyish',
                 'sections' => [
                     [
@@ -114,7 +114,7 @@ class BlogPosts
                 'title' => 'Safe paid chat alternatives: better than random stranger roulette',
                 'excerpt' => 'Why members are leaving anonymous video roulette for verified creators, clear rates, and wallet billing.',
                 'date' => 'July 12, 2026',
-                'author' => 'Team ChatVoiceCall',
+                'author' => 'Team Wyak',
                 'tone' => 'bg-lilac',
                 'sections' => [
                     [
@@ -122,8 +122,8 @@ class BlogPosts
                         'body' => 'For years, “talk to strangers” meant open a site, enable a camera, and hope. That model created millions of chats, and just as many safety and spam problems. In 2026, people still want spontaneous conversation — but they also want trust, boundaries, and a fair way to pay for someone’s time.',
                     ],
                     [
-                        'heading' => 'ChatVoiceCall — verified creators, chat + voice',
-                        'body' => 'ChatVoiceCall is built for paid 1-on-1 conversation. Members discover face-verified creators, see pricing up front, and pay from a wallet for text, voice notes, and live calls.',
+                        'heading' => 'Wyak Dating — verified creators, chat + voice',
+                        'body' => 'Wyak Dating is built for paid 1-on-1 conversation. Members discover face-verified creators, see pricing up front, and pay from a wallet for text, voice notes, and live calls.',
                         'features' => [
                             'Face verification before Discover',
                             'Text chat, voice notes, and voice calling',
@@ -144,7 +144,7 @@ class BlogPosts
                     ],
                     [
                         'heading' => 'What to look for in a safer chat product',
-                        'body' => 'Prefer products with age gates, verification, report/ban tools, and in-app payments. Avoid sending money off-platform. If a creator asks you to leave the app to pay, that is a red flag on ChatVoiceCall — and against community rules.',
+                        'body' => 'Prefer products with age gates, verification, report/ban tools, and in-app payments. Avoid sending money off-platform. If a creator asks you to leave the app to pay, that is a red flag on Wyak Dating — and against community rules.',
                     ],
                 ],
             ],

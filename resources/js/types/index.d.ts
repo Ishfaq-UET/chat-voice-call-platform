@@ -56,4 +56,9 @@ export type PageProps<
     };
     walletBalance?: number | null;
     market?: Market | null;
+    branding?: {
+        logo_url: string | null;
+        favicon_url: string | null;
+        app_name: string;
+    };
 };

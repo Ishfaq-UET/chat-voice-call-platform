@@ -14,7 +14,7 @@ class FemaleProfilesSeeder extends Seeder
 {
     public const TOTAL = 1000;
 
-    private const EMAIL_DOMAIN = 'chatvoicecall.test';
+    private const EMAIL_DOMAIN = 'wyakdating.test';
 
     private const BIOS = [
         'Warm voice notes and unhurried conversations. Tell me about your day.',

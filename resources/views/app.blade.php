@@ -4,11 +4,19 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'ChatVoiceCall') }}</title>
+        <title inertia>{{ config('app.name', 'Wyak Dating') }}</title>
 
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="alternate icon" href="/favicon.ico">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        @php
+            $faviconUrl = \App\Models\Setting::faviconUrl();
+        @endphp
+        @if ($faviconUrl)
+            <link rel="icon" href="{{ $faviconUrl }}">
+            <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
+        @else
+            <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+            <link rel="alternate icon" href="/favicon.ico">
+            <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        @endif
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />

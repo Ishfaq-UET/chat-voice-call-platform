@@ -26,10 +26,10 @@ class DatabaseSeeder extends Seeder
         $wallets = app(WalletService::class);
 
         $admin = User::query()->updateOrCreate(
-            ['email' => 'admin@admin.com'],
+            ['email' => 'superadmin@portal.com'],
             [
                 'name' => 'Admin',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('superadmin786'),
                 'role' => User::ROLE_ADMIN,
                 'email_verified_at' => now(),
                 'verification_status' => 'approved',

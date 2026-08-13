@@ -1,3 +1,4 @@
+import SiteLogo from '@/Components/SiteLogo';
 import { PageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren } from 'react';
@@ -31,30 +32,13 @@ const footerCols = [
     },
 ];
 
-function Logo({ className = '' }: { className?: string }) {
-    return (
-        <Link href="/" className={`inline-flex items-center gap-2 ${className}`}>
-            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand text-white shadow-soft">
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 3c2 3 2 6 0 9-2-3-2-6 0-9Z" />
-                    <path d="M8 8c3 2 6 2 9 0-3 2-3 5 0 9-3-2-6-2-9 0 2-3 2-6 0-9Z" />
-                    <path d="M7 14c2 2 4 3 5 5 1-2 3-3 5-5" />
-                </svg>
-            </span>
-            <span className="text-xl font-extrabold tracking-tight text-brand">
-                ChatVoice<span className="text-ink">Call</span>
-            </span>
-        </Link>
-    );
-}
-
 export function SiteFooter() {
     return (
         <footer className="border-t border-brand/10 bg-white">
             <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
                 <div className="grid gap-10 md:grid-cols-5">
                     <div className="md:col-span-2">
-                        <Logo />
+                        <SiteLogo textClassName="text-xl font-extrabold tracking-tight text-brand" />
                         <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-500">
                             Members-only chat, voice notes, and live calls with face-verified creators. Clear prices.
                             Secure wallets. Fair payouts.
@@ -84,7 +68,7 @@ export function SiteFooter() {
                 </div>
 
                 <div className="mt-12 flex flex-col gap-2 border-t border-slate-100 pt-8 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-                    <p>© {new Date().getFullYear()} ChatVoiceCall</p>
+                    <p>© {new Date().getFullYear()} Wyak Dating</p>
                     <p>Text · Voice notes · Live calls · Verified creators</p>
                 </div>
             </div>
@@ -98,7 +82,7 @@ export function SiteHeader() {
     return (
         <header className="sticky top-0 z-30 border-b border-brand/10 bg-white/85 backdrop-blur-xl">
             <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
-                <Logo />
+                <SiteLogo textClassName="text-xl font-extrabold tracking-tight text-brand" />
 
                 <nav className="hidden items-center gap-7 text-sm font-semibold text-slate-500 md:flex">
                     <Link href="/how-it-works" className="hover:text-brand">

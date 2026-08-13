@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import SiteLogo from '@/Components/SiteLogo';
 import { PropsWithChildren } from 'react';
 
 export default function Guest({
@@ -14,14 +14,11 @@ export default function Guest({
 
             <div className="relative z-10 mx-auto w-full max-w-md pt-8">
                 <div className="mb-8 text-center">
-                    <Link href="/" className="inline-flex items-center gap-2">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand font-black text-white shadow-soft">
-                            CV
-                        </span>
-                        <span className="text-2xl font-extrabold text-brand">
-                            ChatVoice<span className="text-ink">Call</span>
-                        </span>
-                    </Link>
+                    <SiteLogo
+                        className="justify-center"
+                        markClassName="h-10 w-10"
+                        textClassName="text-2xl font-extrabold text-brand"
+                    />
                     {title && <h1 className="mt-5 text-2xl font-extrabold text-ink">{title}</h1>}
                     {subtitle && <p className="mt-2 text-sm text-slate-500">{subtitle}</p>}
                 </div>

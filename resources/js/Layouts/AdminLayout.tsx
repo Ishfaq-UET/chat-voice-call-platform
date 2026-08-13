@@ -12,6 +12,7 @@ import {
     IconUsers,
     IconWallet,
 } from '@/Components/Admin/AdminIcons';
+import SiteLogo from '@/Components/SiteLogo';
 import { PageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ComponentType, PropsWithChildren, ReactNode, SVGProps, useState } from 'react';
@@ -93,26 +94,22 @@ export default function AdminLayout({
     return (
         <div className="min-h-screen bg-canvas">
             <div className="bg-brand px-4 py-2 text-center text-xs font-bold text-white sm:text-sm">
-                Admin panel · ChatVoiceCall
+                Admin panel · Wyak Dating
             </div>
 
             <div className="flex min-h-[calc(100vh-36px)]">
                 {/* Desktop sidebar */}
                 <aside className="hidden w-[260px] shrink-0 flex-col border-r border-brand/10 bg-white lg:flex">
                     <div className="border-b border-brand/10 px-5 py-5">
-                        <Link href={route('admin.dashboard')} className="inline-flex items-center gap-2.5">
-                            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand text-sm font-black text-white shadow-soft">
-                                CV
-                            </span>
-                            <div>
-                                <p className="text-[15px] font-extrabold tracking-tight text-brand">
-                                    ChatVoice<span className="text-ink">Call</span>
-                                </p>
-                                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                        <SiteLogo
+                            href={route('admin.dashboard')}
+                            textClassName="text-[15px] font-extrabold tracking-tight text-brand"
+                            subtitle={
+                                <span className="block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                                     Admin
-                                </p>
-                            </div>
-                        </Link>
+                                </span>
+                            }
+                        />
                     </div>
 
                     <nav className="flex-1 space-y-1 overflow-y-auto p-3">

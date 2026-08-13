@@ -8,7 +8,7 @@ export default function About() {
             <div className="bg-lilac/40">
                 <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
                     <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand">Company</p>
-                    <h1 className="mt-3 text-4xl font-extrabold text-ink sm:text-5xl">About ChatVoiceCall</h1>
+                    <h1 className="mt-3 text-4xl font-extrabold text-ink sm:text-5xl">About Wyak Dating</h1>
                     <p className="mt-4 max-w-2xl text-lg text-slate-500">
                         We built a members-only space for paid conversation — with verification, clear pricing, and
                         creator payouts.
@@ -17,7 +17,7 @@ export default function About() {
                     <div className="mt-12 grid gap-6 lg:grid-cols-2">
                         <div className="card-soft space-y-4 p-6 text-slate-600">
                             <p>
-                                ChatVoiceCall is for people who want more than anonymous roulette. Members choose who
+                                Wyak Dating is for people who want more than anonymous roulette. Members choose who
                                 to talk to. Creators control rates. Everyone sees prices before a chat or call starts.
                             </p>
                             <p>

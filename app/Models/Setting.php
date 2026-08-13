@@ -41,7 +41,35 @@ class Setting extends Model
     {
         return (string) static::getValue(
             'manual_topup_instructions',
-            "Send payment via JazzCash, EasyPaisa, or bank transfer, then submit proof in the wallet form.\nJazzCash: 0300-0000000\nEasyPaisa: 0300-0000000\nBank: Your Bank Name · Account 0000000000 · ChatVoiceCall",
+            "Send payment via JazzCash, EasyPaisa, or bank transfer, then submit proof in the wallet form.\nJazzCash: 0300-0000000\nEasyPaisa: 0300-0000000\nBank: Your Bank Name · Account 0000000000 · Wyak Dating",
         );
+    }
+
+    public static function logoPath(): ?string
+    {
+        $path = static::getValue('logo_path');
+
+        return $path ? (string) $path : null;
+    }
+
+    public static function faviconPath(): ?string
+    {
+        $path = static::getValue('favicon_path');
+
+        return $path ? (string) $path : null;
+    }
+
+    public static function logoUrl(): ?string
+    {
+        $path = static::logoPath();
+
+        return $path ? asset('storage/'.$path) : null;
+    }
+
+    public static function faviconUrl(): ?string
+    {
+        $path = static::faviconPath();
+
+        return $path ? asset('storage/'.$path) : null;
     }
 }

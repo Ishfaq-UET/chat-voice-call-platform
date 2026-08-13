@@ -2,7 +2,7 @@ import MarketingLayout from '@/Layouts/MarketingLayout';
 import { Head, Link } from '@inertiajs/react';
 
 const faqs = [
-    ['Is ChatVoiceCall free?', 'Signup is free. Chat and calls use wallet balance at each creator’s rates.'],
+    ['Is Wyak Dating free?', 'Signup is free. Chat and calls use wallet balance at each creator’s rates.'],
     ['Why do I need to log in?', 'Discover shows personal profiles and paid features, so we require an account.'],
     ['How is this different from Omegle-style apps?', 'You choose verified creators, see prices, and pay from a wallet.'],
     ['How do creators get paid?', 'Earnings go to their wallet after commission; they request withdrawals.'],

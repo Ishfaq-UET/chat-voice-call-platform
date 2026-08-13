@@ -16,7 +16,7 @@ export default function HowItWorks() {
             <Head title="How it works" />
             <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
                 <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand">Product</p>
-                <h1 className="mt-3 text-4xl font-extrabold text-ink sm:text-5xl">How ChatVoiceCall works</h1>
+                <h1 className="mt-3 text-4xl font-extrabold text-ink sm:text-5xl">How Wyak Dating works</h1>
                 <p className="mt-4 max-w-2xl text-lg text-slate-500">From signup to payouts — simple and clear.</p>
 
                 <ol className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

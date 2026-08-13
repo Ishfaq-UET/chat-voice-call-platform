@@ -1,6 +1,7 @@
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
+import SiteLogo from '@/Components/SiteLogo';
 import { formatAgoraMediaError, requestCallMediaPermission } from '@/lib/callMedia';
 import { formatMoney } from '@/lib/money';
 import { PageProps } from '@/types';
@@ -81,14 +82,7 @@ export default function AuthenticatedLayout({
                 <div className="mx-auto max-w-6xl px-4 sm:px-6">
                     <div className="flex h-16 items-center justify-between">
                         <div className="flex items-center gap-8">
-                            <Link href={homeHref} className="inline-flex items-center gap-2">
-                                <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand text-sm font-black text-white shadow-soft">
-                                    CV
-                                </span>
-                                <span className="text-lg font-extrabold text-brand">
-                                    ChatVoice<span className="text-ink">Call</span>
-                                </span>
-                            </Link>
+                            <SiteLogo href={homeHref} />
 
                             <div className="hidden items-center gap-1 sm:flex">
                                 {user.role === 'male' && (

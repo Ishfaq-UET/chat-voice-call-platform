@@ -10,9 +10,9 @@ export default function Contact() {
                 <h1 className="mt-3 text-4xl font-extrabold text-ink">Contact us</h1>
                 <p className="mt-4 text-lg text-slate-500">Account help, verification, or payouts — email the team.</p>
                 <div className="card-soft mt-10 space-y-3 p-6 text-sm font-medium text-slate-600">
-                    <p>General: support@chatvoicecall.local</p>
-                    <p>Creators / payouts: creators@chatvoicecall.local</p>
-                    <p>Safety reports: trust@chatvoicecall.local</p>
+                    <p>General: support@wyakdating.local</p>
+                    <p>Creators / payouts: creators@wyakdating.local</p>
+                    <p>Safety reports: trust@wyakdating.local</p>
                     <p className="pt-2 text-slate-400">Typical reply: 1–2 business days</p>
                 </div>
             </div>
