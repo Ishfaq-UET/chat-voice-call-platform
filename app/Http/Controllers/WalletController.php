@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ManualPaymentMethod;
 use App\Models\ManualTopUpRequest;
-use App\Models\Setting;
 use App\Services\WalletService;
+use App\Support\CountryCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
-use Stripe\Checkout\Session;
-use Stripe\Stripe;
 use Stripe\Webhook;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
@@ -22,8 +21,18 @@ class WalletController extends Controller
         $user = $request->user();
         $wallet = $wallets->ensureWallet($user);
         $transactions = $wallet->transactions()->latest()->paginate(20);
+        $countryCode = CountryCatalog::normalize($user->country_code);
+
+        $paymentMethods = ManualPaymentMethod::query()
+            ->active()
+            ->forCountry($countryCode)
+            ->ordered()
+            ->get()
+            ->map(fn (ManualPaymentMethod $method) => $method->toPublicArray())
+            ->values();
 
         $manualRequests = $user->manualTopUpRequests()
+            ->with('paymentMethod:id,name,account_title,account_number,bank_name')
             ->latest()
             ->limit(10)
             ->get();
@@ -31,57 +40,16 @@ class WalletController extends Controller
         return Inertia::render('Wallet/Index', [
             'balance' => (float) $wallet->balance,
             'transactions' => $transactions,
-            'stripeEnabled' => (bool) config('services.stripe.secret'),
-            'paypalEnabled' => (bool) config('services.paypal.client_id'),
-            'manualInstructions' => Setting::manualTopUpInstructions(),
-            'manualChannels' => ManualTopUpRequest::CHANNELS,
+            'paymentMethods' => $paymentMethods,
             'manualRequests' => $manualRequests,
             'hasPendingManual' => $user->manualTopUpRequests()->where('status', 'pending')->exists(),
         ]);
     }
 
-    public function topUp(Request $request, WalletService $wallets): RedirectResponse|SymfonyResponse
-    {
-        $data = $request->validate([
-            'amount' => ['required', 'numeric', 'min:5', 'max:500'],
-        ]);
-
-        $amount = (float) $data['amount'];
-        $secret = config('services.stripe.secret');
-
-        if (! $secret) {
-            return back()->withErrors([
-                'amount' => 'Card payments are not configured. Please use manual payment with screenshot.',
-            ]);
-        }
-
-        Stripe::setApiKey($secret);
-
-        $session = Session::create([
-            'mode' => 'payment',
-            'payment_method_types' => ['card'],
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => 'usd',
-                    'product_data' => ['name' => 'Wallet top-up'],
-                    'unit_amount' => (int) round($amount * 100),
-                ],
-                'quantity' => 1,
-            ]],
-            'success_url' => route('wallet.index').'?success=1',
-            'cancel_url' => route('wallet.index').'?canceled=1',
-            'metadata' => [
-                'user_id' => (string) $request->user()->id,
-                'amount' => (string) $amount,
-            ],
-        ]);
-
-        return Inertia::location($session->url);
-    }
-
     public function requestManualTopUp(Request $request): RedirectResponse
     {
         $user = $request->user();
+        $countryCode = CountryCatalog::normalize($user->country_code);
 
         if ($user->manualTopUpRequests()->where('status', 'pending')->exists()) {
             return back()->withErrors([
@@ -90,24 +58,34 @@ class WalletController extends Controller
         }
 
         $data = $request->validate([
-            'payment_channel' => ['required', 'string', 'in:'.implode(',', array_keys(ManualTopUpRequest::CHANNELS))],
+            'payment_method_id' => ['required', 'integer', 'exists:manual_payment_methods,id'],
             'sender_account_name' => ['required', 'string', 'max:120'],
             'sender_number' => ['required', 'string', 'max:40'],
-            'receiver_account' => ['required', 'string', 'max:120'],
             'amount' => ['required', 'numeric', 'min:5', 'max:500'],
             'transaction_id' => ['required', 'string', 'max:120'],
             'screenshot' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
             'member_notes' => ['nullable', 'string', 'max:500'],
         ]);
 
+        $method = ManualPaymentMethod::query()
+            ->active()
+            ->forCountry($countryCode)
+            ->find($data['payment_method_id']);
+
+        if (! $method) {
+            return back()->withErrors([
+                'payment_method_id' => 'This payment method is not available in your country.',
+            ]);
+        }
         $path = $data['screenshot']->store('top-up-screenshots', 'public');
 
         ManualTopUpRequest::query()->create([
             'user_id' => $user->id,
-            'payment_channel' => $data['payment_channel'],
+            'payment_method_id' => $method->id,
+            'payment_channel' => $method->name,
             'sender_account_name' => trim($data['sender_account_name']),
             'sender_number' => trim($data['sender_number']),
-            'receiver_account' => trim($data['receiver_account']),
+            'receiver_account' => $method->account_number,
             'amount' => round((float) $data['amount'], 2),
             'transaction_id' => trim($data['transaction_id']),
             'screenshot_path' => $path,

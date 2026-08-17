@@ -9,7 +9,6 @@ import { ChangeEvent, FormEventHandler, useMemo, useState } from 'react';
 type BrandingSettings = {
     commission_percent: number;
     min_withdrawal: number;
-    manual_topup_instructions: string;
     logo_url: string | null;
     favicon_url: string | null;
 };
@@ -85,13 +84,11 @@ export default function AdminSettings({
     const form = useForm<{
         commission_percent: number;
         min_withdrawal: number;
-        manual_topup_instructions: string;
         logo: File | null;
         favicon: File | null;
     }>({
         commission_percent: settings.commission_percent,
         min_withdrawal: settings.min_withdrawal,
-        manual_topup_instructions: settings.manual_topup_instructions,
         logo: null,
         favicon: null,
     });
@@ -126,7 +123,7 @@ export default function AdminSettings({
                             Platform settings
                         </h1>
                         <p className="mt-1.5 text-sm text-slate-500">
-                            Configure branding, commission, withdrawals, and manual top-up instructions.
+                            Configure branding, commission, and withdrawals.
                         </p>
                     </div>
                     <Link href={route('admin.dashboard')} className="btn-ghost self-start px-4 py-2.5">
@@ -199,22 +196,6 @@ export default function AdminSettings({
                                 />
                             </AdminField>
                         </div>
-                    </AdminFormSection>
-
-                    <AdminFormSection
-                        title="Manual top-up instructions"
-                        description="Shown on the member Wallet page. Include bank name, account number, and any payment notes."
-                    >
-                        <AdminField label="Payment instructions" required>
-                            <textarea
-                                value={form.data.manual_topup_instructions}
-                                onChange={(e) => form.setData('manual_topup_instructions', e.target.value)}
-                                rows={6}
-                                className="w-full rounded-2xl border-brand/15 bg-white px-3.5 py-2.5 text-sm text-ink shadow-sm placeholder:text-slate-400 focus:border-brand focus:ring-brand"
-                                placeholder={'Bank: ...\nAccount: ...\nAccount holder: ...'}
-                                required
-                            />
-                        </AdminField>
                     </AdminFormSection>
 
                     <div className="flex justify-end gap-3">

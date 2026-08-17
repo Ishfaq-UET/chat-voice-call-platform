@@ -19,7 +19,6 @@ class SettingsController extends Controller
             'settings' => [
                 'commission_percent' => Setting::commissionPercent(),
                 'min_withdrawal' => Setting::minWithdrawal(),
-                'manual_topup_instructions' => Setting::manualTopUpInstructions(),
                 'logo_url' => Setting::logoUrl(),
                 'favicon_url' => Setting::faviconUrl(),
             ],
@@ -31,14 +30,12 @@ class SettingsController extends Controller
         $data = $request->validate([
             'commission_percent' => ['required', 'numeric', 'min:0', 'max:90'],
             'min_withdrawal' => ['required', 'numeric', 'min:1'],
-            'manual_topup_instructions' => ['required', 'string', 'max:2000'],
             'logo' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp,svg', 'max:2048'],
             'favicon' => ['nullable', 'file', 'mimes:ico,png,jpg,jpeg,webp,svg,gif', 'max:1024'],
         ]);
 
         Setting::setValue('commission_percent', $data['commission_percent']);
         Setting::setValue('min_withdrawal', $data['min_withdrawal']);
-        Setting::setValue('manual_topup_instructions', $data['manual_topup_instructions']);
 
         if ($request->hasFile('logo')) {
             $this->storeBrandingFile($request->file('logo'), 'logo_path', 'branding/logo');

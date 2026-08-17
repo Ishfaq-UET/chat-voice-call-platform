@@ -16,6 +16,7 @@ class ManualTopUpRequest extends Model
 
     protected $fillable = [
         'user_id',
+        'payment_method_id',
         'payment_channel',
         'sender_account_name',
         'sender_number',
@@ -50,7 +51,13 @@ class ManualTopUpRequest extends Model
 
     public function getPaymentChannelLabelAttribute(): string
     {
-        return self::CHANNELS[$this->payment_channel] ?? ucfirst(str_replace('_', ' ', (string) $this->payment_channel));
+        return $this->paymentMethod?->name
+            ?? (self::CHANNELS[$this->payment_channel] ?? ucfirst(str_replace('_', ' ', (string) $this->payment_channel)));
+    }
+
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(ManualPaymentMethod::class, 'payment_method_id');
     }
 
     public function user(): BelongsTo

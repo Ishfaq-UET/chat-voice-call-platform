@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CallController as AdminCallController;
 use App\Http\Controllers\Admin\ConversationController as AdminConversationController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ManualPaymentMethodController as AdminManualPaymentMethodController;
 use App\Http\Controllers\Admin\ManualTopUpController as AdminManualTopUpController;
 use App\Http\Controllers\Admin\NameChangeController as AdminNameChangeController;
 use App\Http\Controllers\Admin\BannerController as AdminBannerController;
@@ -49,7 +50,6 @@ Route::middleware(['auth', 'online'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
-    Route::post('/wallet/top-up', [WalletController::class, 'topUp'])->name('wallet.top-up');
     Route::post('/wallet/manual-top-up', [WalletController::class, 'requestManualTopUp'])->name('wallet.manual-top-up');
 
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
@@ -107,6 +107,14 @@ Route::middleware(['auth', 'online'])->group(function () {
         Route::get('/top-ups', [AdminManualTopUpController::class, 'index'])->name('top-ups');
         Route::post('/top-ups/{topUp}/approve', [AdminManualTopUpController::class, 'approve'])->name('top-ups.approve');
         Route::post('/top-ups/{topUp}/reject', [AdminManualTopUpController::class, 'reject'])->name('top-ups.reject');
+
+        Route::get('/payment-methods', [AdminManualPaymentMethodController::class, 'index'])->name('payment-methods');
+        Route::get('/payment-methods/create', [AdminManualPaymentMethodController::class, 'create'])->name('payment-methods.create');
+        Route::post('/payment-methods', [AdminManualPaymentMethodController::class, 'store'])->name('payment-methods.store');
+        Route::get('/payment-methods/{paymentMethod}/edit', [AdminManualPaymentMethodController::class, 'edit'])->name('payment-methods.edit');
+        Route::put('/payment-methods/{paymentMethod}', [AdminManualPaymentMethodController::class, 'update'])->name('payment-methods.update');
+        Route::delete('/payment-methods/{paymentMethod}', [AdminManualPaymentMethodController::class, 'destroy'])->name('payment-methods.destroy');
+        Route::post('/payment-methods/{paymentMethod}/toggle', [AdminManualPaymentMethodController::class, 'toggle'])->name('payment-methods.toggle');
 
         Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])->name('withdrawals');
         Route::post('/withdrawals/{withdrawal}/approve', [AdminWithdrawalController::class, 'approve'])->name('withdrawals.approve');

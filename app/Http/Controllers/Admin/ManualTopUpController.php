@@ -17,7 +17,11 @@ class ManualTopUpController extends Controller
         $status = $request->input('status', 'pending');
 
         $requests = ManualTopUpRequest::query()
-            ->with(['user:id,name,email,phone,avatar,role', 'reviewer:id,name'])
+            ->with([
+                'user:id,name,email,phone,avatar,role,country_code',
+                'reviewer:id,name',
+                'paymentMethod',
+            ])
             ->when(
                 $status !== 'all',
                 fn ($q) => $q->where('status', $status),
@@ -57,6 +61,7 @@ class ManualTopUpController extends Controller
             $topUp,
             [
                 'source' => 'manual_top_up',
+                'payment_method_id' => $topUp->payment_method_id,
                 'payment_channel' => $topUp->payment_channel,
                 'transaction_id' => $topUp->transaction_id,
                 'sender_number' => $topUp->sender_number,

@@ -22,8 +22,16 @@ type TopUpRequest = {
     admin_notes?: string | null;
     created_at: string;
     reviewed_at?: string | null;
-    user: User & { phone?: string | null };
+    user: User & { phone?: string | null; country_code?: string };
     reviewer?: { id: number; name: string } | null;
+    payment_method?: {
+        id: number;
+        name: string;
+        country_code: string;
+        account_title: string;
+        bank_name: string | null;
+        account_number: string;
+    } | null;
 };
 
 export default function AdminTopUpsIndex({
@@ -89,7 +97,7 @@ export default function AdminTopUpsIndex({
                         </>
                     }
                     title="Top-up requests"
-                    description="Review JazzCash / EasyPaisa / bank details and screenshot, then credit the wallet."
+                    description="Review country payment methods, sender details, and screenshots, then credit the wallet."
                     meta={`${counts.pending} pending`}
                 />
 
@@ -126,6 +134,11 @@ export default function AdminTopUpsIndex({
                                                 {item.payment_channel_label}
                                             </span>
                                         )}
+                                        {item.payment_method?.country_code && (
+                                            <span className="chip ms-2 bg-brand-soft text-brand">
+                                                {item.payment_method.country_code}
+                                            </span>
+                                        )}
                                     </p>
                                     <p className="mt-1 font-semibold text-ink">{item.user.name}</p>
                                     <p className="text-sm text-slate-500">
@@ -155,7 +168,7 @@ export default function AdminTopUpsIndex({
                                                 Send to
                                             </dt>
                                             <dd className="mt-0.5 font-semibold text-ink font-mono">
-                                                {item.receiver_account || '—'}
+                                                {item.receiver_account || item.payment_method?.account_number || '—'}
                                             </dd>
                                         </div>
                                         <div className="rounded-xl bg-canvas px-3 py-2">

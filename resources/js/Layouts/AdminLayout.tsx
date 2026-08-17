@@ -33,6 +33,7 @@ const adminLinks: {
     { href: 'admin.chats', label: 'Chats & voices', match: 'admin.chats*', icon: IconChat },
     { href: 'admin.calls', label: 'Calls', match: 'admin.calls*', icon: IconPhone },
     { href: 'admin.top-ups', label: 'Top-up requests', match: 'admin.top-ups*', icon: IconTopUp },
+    { href: 'admin.payment-methods', label: 'Payment methods', match: 'admin.payment-methods*', icon: IconWallet },
     { href: 'admin.transactions', label: 'Transactions', match: 'admin.transactions*', icon: IconLedger },
     { href: 'admin.withdrawals', label: 'Withdrawals', match: 'admin.withdrawals*', icon: IconWallet },
     { href: 'admin.banners', label: 'Banners', match: 'admin.banners*', icon: IconBanner },

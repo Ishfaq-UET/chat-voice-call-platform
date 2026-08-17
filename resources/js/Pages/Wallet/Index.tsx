@@ -13,6 +13,16 @@ type Tx = {
     created_at: string;
 };
 
+type PaymentMethod = {
+    id: number;
+    name: string;
+    country_code: string;
+    account_title: string;
+    bank_name: string | null;
+    account_number: string;
+    extra_instructions: string | null;
+};
+
 type ManualRequest = {
     id: number;
     amount: number | string;
@@ -28,63 +38,49 @@ type ManualRequest = {
     admin_notes?: string | null;
     created_at: string;
     reviewed_at?: string | null;
+    payment_method?: { id: number; name: string } | null;
 };
-
-type PaymentMethod = 'stripe' | 'paypal' | 'manual';
 
 export default function WalletIndex({
     balance,
     transactions,
-    stripeEnabled,
-    paypalEnabled = false,
-    manualInstructions,
-    manualChannels = {
-        jazzcash: 'JazzCash',
-        easypaisa: 'EasyPaisa',
-        bank_transfer: 'Bank transfer',
-        other: 'Other',
-    },
+    paymentMethods = [],
     manualRequests = [],
     hasPendingManual = false,
 }: PageProps<{
     balance: number;
     transactions: Paginated<Tx>;
-    stripeEnabled: boolean;
-    paypalEnabled?: boolean;
-    manualInstructions: string;
-    manualChannels?: Record<string, string>;
+    paymentMethods?: PaymentMethod[];
     manualRequests?: ManualRequest[];
     hasPendingManual?: boolean;
 }>) {
     const flash = usePage<PageProps>().props.flash;
     const market = usePage<PageProps>().props.market;
     const [preview, setPreview] = useState<string | null>(null);
-    const [method, setMethod] = useState<PaymentMethod | null>(null);
+    const [selectedId, setSelectedId] = useState<number | null>(paymentMethods[0]?.id ?? null);
+    const selected = paymentMethods.find((m) => m.id === selectedId) ?? null;
 
-    const stripeForm = useForm({ amount: 20 });
     const manualForm = useForm<{
-        payment_channel: string;
+        payment_method_id: number | '';
         sender_account_name: string;
         sender_number: string;
-        receiver_account: string;
         amount: number;
         transaction_id: string;
         screenshot: File | null;
         member_notes: string;
     }>({
-        payment_channel: 'jazzcash',
+        payment_method_id: paymentMethods[0]?.id ?? '',
         sender_account_name: '',
         sender_number: '',
-        receiver_account: '',
         amount: 20,
         transaction_id: '',
         screenshot: null,
         member_notes: '',
     });
 
-    const submitStripe: FormEventHandler = (e) => {
-        e.preventDefault();
-        stripeForm.post(route('wallet.top-up'));
+    const pickMethod = (id: number) => {
+        setSelectedId(id);
+        manualForm.setData('payment_method_id', id);
     };
 
     const submitManual: FormEventHandler = (e) => {
@@ -94,10 +90,9 @@ export default function WalletIndex({
             onSuccess: () => {
                 manualForm.reset();
                 manualForm.setData({
-                    payment_channel: 'jazzcash',
+                    payment_method_id: selectedId ?? paymentMethods[0]?.id ?? '',
                     sender_account_name: '',
                     sender_number: '',
-                    receiver_account: '',
                     amount: 20,
                     transaction_id: '',
                     screenshot: null,
@@ -114,35 +109,6 @@ export default function WalletIndex({
         if (status === 'rejected') return 'bg-rose-50 text-rose-600';
         return 'bg-amber-50 text-amber-800';
     };
-
-    const methods: {
-        id: PaymentMethod;
-        title: string;
-        description: string;
-        available: boolean;
-        badge?: string;
-    }[] = [
-        {
-            id: 'stripe',
-            title: 'Stripe',
-            description: 'Pay instantly with debit or credit card.',
-            available: stripeEnabled,
-            badge: stripeEnabled ? undefined : 'Unavailable',
-        },
-        {
-            id: 'paypal',
-            title: 'PayPal',
-            description: 'Pay with your PayPal balance or linked card.',
-            available: paypalEnabled,
-            badge: paypalEnabled ? undefined : 'Coming soon',
-        },
-        {
-            id: 'manual',
-            title: 'Manual payment',
-            description: 'JazzCash, EasyPaisa, or bank transfer — upload proof for admin review.',
-            available: true,
-        },
-    ];
 
     return (
         <AuthenticatedLayout
@@ -168,261 +134,243 @@ export default function WalletIndex({
 
                 <div className="card-soft p-5 sm:p-6">
                     <h3 className="text-lg font-extrabold text-ink">Add money</h3>
-                    <p className="mt-1 text-sm text-slate-500">Choose how you want to top up your wallet.</p>
+                    <p className="mt-1 text-sm text-slate-500">
+                        Pay using a local method for {market?.country_name ?? 'your country'}, then submit proof for admin
+                        review.
+                    </p>
 
-                    <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                        {methods.map((m) => {
-                            const selected = method === m.id;
-                            return (
-                                <button
-                                    key={m.id}
-                                    type="button"
-                                    disabled={!m.available}
-                                    onClick={() => setMethod(m.id)}
-                                    className={`rounded-2xl border p-4 text-left transition ${
-                                        selected
-                                            ? 'border-brand bg-brand-soft ring-2 ring-brand/30'
-                                            : m.available
-                                              ? 'border-brand/15 bg-white hover:border-brand/40'
-                                              : 'cursor-not-allowed border-slate-100 bg-slate-50 opacity-70'
-                                    }`}
-                                >
-                                    <div className="flex items-start justify-between gap-2">
-                                        <p className="font-extrabold text-ink">{m.title}</p>
-                                        {m.badge && (
-                                            <span className="shrink-0 rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                                                {m.badge}
-                                            </span>
+                    {paymentMethods.length === 0 ? (
+                        <div className="mt-5 rounded-2xl border border-dashed border-brand/20 bg-canvas px-4 py-8 text-center text-sm text-slate-500">
+                            No payment methods are available for your country yet. Please contact support.
+                        </div>
+                    ) : (
+                        <>
+                            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                                {paymentMethods.map((m) => {
+                                    const isSelected = selectedId === m.id;
+                                    return (
+                                        <button
+                                            key={m.id}
+                                            type="button"
+                                            onClick={() => pickMethod(m.id)}
+                                            className={`rounded-2xl border p-4 text-left transition ${
+                                                isSelected
+                                                    ? 'border-brand bg-brand-soft ring-2 ring-brand/30'
+                                                    : 'border-brand/15 bg-white hover:border-brand/40'
+                                            }`}
+                                        >
+                                            <p className="font-extrabold text-ink">{m.name}</p>
+                                            <p className="mt-1 text-xs text-slate-500">
+                                                {m.bank_name || m.account_title}
+                                            </p>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {selected && (
+                                <div className="mt-6 space-y-4 border-t border-brand/10 pt-6">
+                                    <div className="rounded-2xl bg-brand-soft px-4 py-4 text-sm text-brand">
+                                        <p className="text-xs font-bold uppercase tracking-wide text-brand/70">
+                                            Send payment to
+                                        </p>
+                                        <p className="mt-2 text-base font-extrabold text-ink">{selected.name}</p>
+                                        <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+                                            <div>
+                                                <dt className="text-[11px] font-bold uppercase tracking-wide text-brand/60">
+                                                    Account title
+                                                </dt>
+                                                <dd className="font-semibold text-ink">{selected.account_title}</dd>
+                                            </div>
+                                            {selected.bank_name && (
+                                                <div>
+                                                    <dt className="text-[11px] font-bold uppercase tracking-wide text-brand/60">
+                                                        Bank / wallet
+                                                    </dt>
+                                                    <dd className="font-semibold text-ink">{selected.bank_name}</dd>
+                                                </div>
+                                            )}
+                                            <div className="sm:col-span-2">
+                                                <dt className="text-[11px] font-bold uppercase tracking-wide text-brand/60">
+                                                    Account number / IBAN
+                                                </dt>
+                                                <dd className="font-mono text-base font-extrabold text-ink">
+                                                    {selected.account_number}
+                                                </dd>
+                                            </div>
+                                        </dl>
+                                        {selected.extra_instructions && (
+                                            <p className="mt-3 whitespace-pre-wrap text-sm font-semibold text-brand">
+                                                {selected.extra_instructions}
+                                            </p>
                                         )}
                                     </div>
-                                    <p className="mt-1 text-xs text-slate-500">{m.description}</p>
-                                </button>
-                            );
-                        })}
-                    </div>
 
-                    {method === 'stripe' && stripeEnabled && (
-                        <form onSubmit={submitStripe} className="mt-6 space-y-4 border-t border-brand/10 pt-6">
-                            <p className="text-sm text-slate-500">Enter the amount and continue to Stripe Checkout.</p>
-                            <div>
-                                <label className="text-sm font-bold text-slate-700">Amount (USD)</label>
-                                <input
-                                    type="number"
-                                    min={5}
-                                    max={500}
-                                    step="1"
-                                    value={stripeForm.data.amount}
-                                    onChange={(e) => stripeForm.setData('amount', Number(e.target.value))}
-                                    className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand"
-                                    required
-                                />
-                                {stripeForm.errors.amount && (
-                                    <p className="mt-1 text-sm text-rose-600">{stripeForm.errors.amount}</p>
-                                )}
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={stripeForm.processing}
-                                className="rounded-2xl bg-ink px-5 py-2.5 text-sm font-extrabold text-white disabled:opacity-40"
-                            >
-                                Continue to Stripe
-                            </button>
-                        </form>
-                    )}
+                                    {hasPendingManual && (
+                                        <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                                            You have a pending request. Wait for admin to verify it before submitting
+                                            another.
+                                        </div>
+                                    )}
 
-                    {method === 'paypal' && (
-                        <div className="mt-6 rounded-2xl border border-dashed border-brand/20 bg-canvas px-4 py-5 text-sm text-slate-600">
-                            {paypalEnabled
-                                ? 'PayPal checkout will open here once configured.'
-                                : 'PayPal is not available yet. Please use Stripe or manual payment.'}
-                        </div>
-                    )}
+                                    <form onSubmit={submitManual} className="space-y-4">
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label className="text-sm font-bold text-slate-700">
+                                                    Send from account
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={manualForm.data.sender_account_name}
+                                                    onChange={(e) =>
+                                                        manualForm.setData('sender_account_name', e.target.value)
+                                                    }
+                                                    disabled={hasPendingManual}
+                                                    placeholder="Your account / title name"
+                                                    className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
+                                                    required
+                                                />
+                                                {manualForm.errors.sender_account_name && (
+                                                    <p className="mt-1 text-sm text-rose-600">
+                                                        {manualForm.errors.sender_account_name}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label className="text-sm font-bold text-slate-700">
+                                                    Send from number
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={manualForm.data.sender_number}
+                                                    onChange={(e) =>
+                                                        manualForm.setData('sender_number', e.target.value)
+                                                    }
+                                                    disabled={hasPendingManual}
+                                                    placeholder="Your wallet / account number"
+                                                    className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
+                                                    required
+                                                />
+                                                {manualForm.errors.sender_number && (
+                                                    <p className="mt-1 text-sm text-rose-600">
+                                                        {manualForm.errors.sender_number}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
 
-                    {method === 'manual' && (
-                        <div className="mt-6 space-y-4 border-t border-brand/10 pt-6">
-                            <p className="text-sm text-slate-500">
-                                Pay using JazzCash, EasyPaisa, or bank transfer, then submit the details below for admin
-                                verification.
-                            </p>
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label className="text-sm font-bold text-slate-700">Amount sent</label>
+                                                <input
+                                                    type="number"
+                                                    min={5}
+                                                    max={500}
+                                                    step="0.01"
+                                                    value={manualForm.data.amount}
+                                                    onChange={(e) =>
+                                                        manualForm.setData('amount', Number(e.target.value))
+                                                    }
+                                                    disabled={hasPendingManual}
+                                                    className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
+                                                    required
+                                                />
+                                                {manualForm.errors.amount && (
+                                                    <p className="mt-1 text-sm text-rose-600">
+                                                        {manualForm.errors.amount}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label className="text-sm font-bold text-slate-700">
+                                                    Transaction ID (TID)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={manualForm.data.transaction_id}
+                                                    onChange={(e) =>
+                                                        manualForm.setData('transaction_id', e.target.value)
+                                                    }
+                                                    disabled={hasPendingManual}
+                                                    placeholder="Transaction / reference ID"
+                                                    className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
+                                                    required
+                                                />
+                                                {manualForm.errors.transaction_id && (
+                                                    <p className="mt-1 text-sm text-rose-600">
+                                                        {manualForm.errors.transaction_id}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
 
-                            <div className="whitespace-pre-wrap rounded-2xl bg-brand-soft px-4 py-3 text-sm font-semibold text-brand">
-                                {manualInstructions}
-                            </div>
+                                        <div>
+                                            <label className="text-sm font-bold text-slate-700">
+                                                Payment screenshot
+                                            </label>
+                                            <input
+                                                type="file"
+                                                accept="image/jpeg,image/png,image/webp"
+                                                disabled={hasPendingManual}
+                                                className="mt-1 block w-full text-sm"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0] ?? null;
+                                                    manualForm.setData('screenshot', file);
+                                                    if (preview) URL.revokeObjectURL(preview);
+                                                    setPreview(file ? URL.createObjectURL(file) : null);
+                                                }}
+                                                required={!hasPendingManual}
+                                            />
+                                            {manualForm.errors.screenshot && (
+                                                <p className="mt-1 text-sm text-rose-600">
+                                                    {manualForm.errors.screenshot}
+                                                </p>
+                                            )}
+                                            {preview && (
+                                                <img
+                                                    src={preview}
+                                                    alt="Payment screenshot preview"
+                                                    className="mt-3 max-h-48 rounded-2xl object-cover ring-1 ring-brand/10"
+                                                />
+                                            )}
+                                        </div>
 
-                            {hasPendingManual && (
-                                <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
-                                    You have a pending request. Wait for admin to verify it before submitting another.
+                                        <div>
+                                            <label className="text-sm font-bold text-slate-700">Notes (optional)</label>
+                                            <textarea
+                                                value={manualForm.data.member_notes}
+                                                onChange={(e) =>
+                                                    manualForm.setData('member_notes', e.target.value)
+                                                }
+                                                disabled={hasPendingManual}
+                                                rows={2}
+                                                placeholder="Anything else the admin should know"
+                                                className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
+                                            />
+                                        </div>
+
+                                        {manualForm.errors.payment_method_id && (
+                                            <p className="text-sm text-rose-600">
+                                                {manualForm.errors.payment_method_id}
+                                            </p>
+                                        )}
+                                        {(manualForm.errors as Record<string, string>).manual && (
+                                            <p className="text-sm text-rose-600">
+                                                {(manualForm.errors as Record<string, string>).manual}
+                                            </p>
+                                        )}
+
+                                        <button
+                                            type="submit"
+                                            disabled={manualForm.processing || hasPendingManual}
+                                            className="rounded-2xl bg-brand px-5 py-2.5 text-sm font-extrabold text-white shadow-soft hover:bg-brand-deep disabled:opacity-40"
+                                        >
+                                            Submit for admin review
+                                        </button>
+                                    </form>
                                 </div>
                             )}
-
-                            <form onSubmit={submitManual} className="space-y-4">
-                                <div>
-                                    <label className="text-sm font-bold text-slate-700">Payment method</label>
-                                    <select
-                                        value={manualForm.data.payment_channel}
-                                        onChange={(e) => manualForm.setData('payment_channel', e.target.value)}
-                                        disabled={hasPendingManual}
-                                        className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
-                                        required
-                                    >
-                                        {Object.entries(manualChannels).map(([value, label]) => (
-                                            <option key={value} value={value}>
-                                                {label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {manualForm.errors.payment_channel && (
-                                        <p className="mt-1 text-sm text-rose-600">{manualForm.errors.payment_channel}</p>
-                                    )}
-                                </div>
-
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <label className="text-sm font-bold text-slate-700">Send from account</label>
-                                        <input
-                                            type="text"
-                                            value={manualForm.data.sender_account_name}
-                                            onChange={(e) =>
-                                                manualForm.setData('sender_account_name', e.target.value)
-                                            }
-                                            disabled={hasPendingManual}
-                                            placeholder="Account / title name"
-                                            className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
-                                            required
-                                        />
-                                        {manualForm.errors.sender_account_name && (
-                                            <p className="mt-1 text-sm text-rose-600">
-                                                {manualForm.errors.sender_account_name}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-bold text-slate-700">Send from number</label>
-                                        <input
-                                            type="text"
-                                            value={manualForm.data.sender_number}
-                                            onChange={(e) => manualForm.setData('sender_number', e.target.value)}
-                                            disabled={hasPendingManual}
-                                            placeholder="Your JazzCash / EasyPaisa / account no."
-                                            className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
-                                            required
-                                        />
-                                        {manualForm.errors.sender_number && (
-                                            <p className="mt-1 text-sm text-rose-600">{manualForm.errors.sender_number}</p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="text-sm font-bold text-slate-700">Send to</label>
-                                    <input
-                                        type="text"
-                                        value={manualForm.data.receiver_account}
-                                        onChange={(e) => manualForm.setData('receiver_account', e.target.value)}
-                                        disabled={hasPendingManual}
-                                        placeholder="Platform account / number you paid to"
-                                        className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
-                                        required
-                                    />
-                                    {manualForm.errors.receiver_account && (
-                                        <p className="mt-1 text-sm text-rose-600">{manualForm.errors.receiver_account}</p>
-                                    )}
-                                </div>
-
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <label className="text-sm font-bold text-slate-700">Amount sent</label>
-                                        <input
-                                            type="number"
-                                            min={5}
-                                            max={500}
-                                            step="0.01"
-                                            value={manualForm.data.amount}
-                                            onChange={(e) => manualForm.setData('amount', Number(e.target.value))}
-                                            disabled={hasPendingManual}
-                                            className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
-                                            required
-                                        />
-                                        {manualForm.errors.amount && (
-                                            <p className="mt-1 text-sm text-rose-600">{manualForm.errors.amount}</p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-bold text-slate-700">Transaction ID (TID)</label>
-                                        <input
-                                            type="text"
-                                            value={manualForm.data.transaction_id}
-                                            onChange={(e) => manualForm.setData('transaction_id', e.target.value)}
-                                            disabled={hasPendingManual}
-                                            placeholder="e.g. JazzCash / EasyPaisa TID"
-                                            className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
-                                            required
-                                        />
-                                        {manualForm.errors.transaction_id && (
-                                            <p className="mt-1 text-sm text-rose-600">
-                                                {manualForm.errors.transaction_id}
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="text-sm font-bold text-slate-700">Payment screenshot</label>
-                                    <input
-                                        type="file"
-                                        accept="image/jpeg,image/png,image/webp"
-                                        disabled={hasPendingManual}
-                                        className="mt-1 block w-full text-sm"
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0] ?? null;
-                                            manualForm.setData('screenshot', file);
-                                            if (preview) URL.revokeObjectURL(preview);
-                                            setPreview(file ? URL.createObjectURL(file) : null);
-                                        }}
-                                        required={!hasPendingManual}
-                                    />
-                                    {manualForm.errors.screenshot && (
-                                        <p className="mt-1 text-sm text-rose-600">{manualForm.errors.screenshot}</p>
-                                    )}
-                                    {preview && (
-                                        <img
-                                            src={preview}
-                                            alt="Payment screenshot preview"
-                                            className="mt-3 max-h-48 rounded-2xl object-cover ring-1 ring-brand/10"
-                                        />
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label className="text-sm font-bold text-slate-700">Notes (optional)</label>
-                                    <textarea
-                                        value={manualForm.data.member_notes}
-                                        onChange={(e) => manualForm.setData('member_notes', e.target.value)}
-                                        disabled={hasPendingManual}
-                                        rows={2}
-                                        placeholder="Anything else the admin should know"
-                                        className="mt-1 w-full rounded-2xl border-brand/15 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50"
-                                    />
-                                    {manualForm.errors.member_notes && (
-                                        <p className="mt-1 text-sm text-rose-600">{manualForm.errors.member_notes}</p>
-                                    )}
-                                </div>
-
-                                {(manualForm.errors as Record<string, string>).manual && (
-                                    <p className="text-sm text-rose-600">
-                                        {(manualForm.errors as Record<string, string>).manual}
-                                    </p>
-                                )}
-
-                                <button
-                                    type="submit"
-                                    disabled={manualForm.processing || hasPendingManual}
-                                    className="rounded-2xl bg-brand px-5 py-2.5 text-sm font-extrabold text-white shadow-soft hover:bg-brand-deep disabled:opacity-40"
-                                >
-                                    Submit for admin review
-                                </button>
-                            </form>
-                        </div>
+                        </>
                     )}
                 </div>
 
@@ -437,7 +385,7 @@ export default function WalletIndex({
                                     <div>
                                         <p className="font-bold text-ink">{formatMoney(r.amount, market)}</p>
                                         <p className="text-xs text-slate-500">
-                                            {r.payment_channel_label ?? r.payment_channel ?? 'Manual'} · TID:{' '}
+                                            {r.payment_method?.name ?? r.payment_channel_label ?? 'Manual'} · TID:{' '}
                                             {r.transaction_id}
                                         </p>
                                         {(r.sender_number || r.receiver_account) && (
