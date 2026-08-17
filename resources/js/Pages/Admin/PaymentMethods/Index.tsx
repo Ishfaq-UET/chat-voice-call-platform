@@ -1,5 +1,7 @@
 import AdminPageBanner from '@/Components/Admin/AdminPageBanner';
 import { IconPlus, IconWallet } from '@/Components/Admin/AdminIcons';
+import CountryFlag from '@/Components/CountryFlag';
+import PaymentMethodLogo from '@/Components/PaymentMethodLogo';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
@@ -7,6 +9,7 @@ import { Head, Link, router } from '@inertiajs/react';
 type MethodRow = {
     id: number;
     name: string;
+    logo_url: string | null;
     country_code: string;
     country_name: string;
     account_title: string;
@@ -65,6 +68,7 @@ export default function AdminPaymentMethodsIndex({
                                 key={method.id}
                                 className="flex flex-col gap-4 rounded-3xl border border-brand/10 bg-white p-4 shadow-sm sm:flex-row sm:items-center"
                             >
+                                <PaymentMethodLogo src={method.logo_url} name={method.name} size="lg" />
                                 <div className="min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <span
@@ -76,8 +80,9 @@ export default function AdminPaymentMethodsIndex({
                                         >
                                             {method.is_active ? 'Active' : 'Off'}
                                         </span>
-                                        <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-[11px] font-bold text-brand">
-                                            {method.country_name} ({method.country_code})
+                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-2.5 py-0.5 text-[11px] font-bold text-brand">
+                                            <CountryFlag code={method.country_code} title={method.country_name} className="h-3 w-4" />
+                                            {method.country_name}
                                         </span>
                                     </div>
                                     <p className="mt-1.5 text-base font-extrabold text-ink">{method.name}</p>

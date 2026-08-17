@@ -7,6 +7,7 @@ use App\Models\ManualPaymentMethod;
 use App\Support\CountryCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,6 +22,7 @@ class ManualPaymentMethodController extends Controller
             ->map(fn (ManualPaymentMethod $method) => [
                 'id' => $method->id,
                 'name' => $method->name,
+                'logo_url' => $method->logo_url,
                 'country_code' => $method->country_code,
                 'country_name' => CountryCatalog::name($method->country_code),
                 'account_title' => $method->account_title,
@@ -46,7 +48,10 @@ class ManualPaymentMethodController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        ManualPaymentMethod::query()->create($this->validated($request));
+        $data = $this->validated($request);
+        $data['logo_path'] = $this->storeLogo($request->file('logo'));
+
+        ManualPaymentMethod::query()->create($data);
 
         return redirect()
             ->route('admin.payment-methods')
@@ -59,6 +64,7 @@ class ManualPaymentMethodController extends Controller
             'method' => [
                 'id' => $paymentMethod->id,
                 'name' => $paymentMethod->name,
+                'logo_url' => $paymentMethod->logo_url,
                 'country_code' => $paymentMethod->country_code,
                 'account_title' => $paymentMethod->account_title,
                 'bank_name' => $paymentMethod->bank_name ?? '',
@@ -73,7 +79,19 @@ class ManualPaymentMethodController extends Controller
 
     public function update(Request $request, ManualPaymentMethod $paymentMethod): RedirectResponse
     {
-        $paymentMethod->update($this->validated($request));
+        $data = $this->validated($request);
+
+        if ($request->hasFile('logo')) {
+            $paymentMethod->deleteLogo();
+            $data['logo_path'] = $this->storeLogo($request->file('logo'));
+        }
+
+        if ($request->boolean('remove_logo') && ! $request->hasFile('logo')) {
+            $paymentMethod->deleteLogo();
+            $data['logo_path'] = null;
+        }
+
+        $paymentMethod->update($data);
 
         return redirect()
             ->route('admin.payment-methods')
@@ -82,6 +100,7 @@ class ManualPaymentMethodController extends Controller
 
     public function destroy(ManualPaymentMethod $paymentMethod): RedirectResponse
     {
+        $paymentMethod->deleteLogo();
         $paymentMethod->delete();
 
         return back()->with('success', 'Payment method deleted.');
@@ -102,6 +121,7 @@ class ManualPaymentMethodController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:80'],
+            'logo' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp,svg,gif', 'max:2048'],
             'country_code' => ['required', 'string', 'size:2', CountryCatalog::countryCodeRule()],
             'account_title' => ['required', 'string', 'max:120'],
             'bank_name' => ['nullable', 'string', 'max:120'],
@@ -109,6 +129,7 @@ class ManualPaymentMethodController extends Controller
             'extra_instructions' => ['nullable', 'string', 'max:2000'],
             'is_active' => ['sometimes', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:999'],
+            'remove_logo' => ['sometimes', 'boolean'],
         ]);
 
         $data['country_code'] = CountryCatalog::normalize($data['country_code']);
@@ -117,6 +138,17 @@ class ManualPaymentMethodController extends Controller
         $data['extra_instructions'] = $data['extra_instructions'] ?: null;
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
 
+        unset($data['logo'], $data['remove_logo']);
+
         return $data;
+    }
+
+    private function storeLogo(?UploadedFile $file): ?string
+    {
+        if (! $file) {
+            return null;
+        }
+
+        return $file->store('payment-logos', 'public');
     }
 }

@@ -1,6 +1,7 @@
 import AdminPageBanner from '@/Components/Admin/AdminPageBanner';
 import { AdminField, AdminInput, AdminSelect } from '@/Components/Admin/AdminField';
 import { IconWallet } from '@/Components/Admin/AdminIcons';
+import AdminPersonCell from '@/Components/Admin/AdminPersonCell';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps, Paginated, User } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
@@ -129,17 +130,20 @@ export default function AdminWithdrawals({
                     {withdrawals.data.map((w) => (
                         <div key={w.id} className="card-soft p-5 sm:p-6">
                             <div className="flex flex-wrap items-start justify-between gap-4">
-                                <div>
+                                <div className="min-w-0">
                                     <p className="text-lg font-extrabold text-ink">
                                         ${Number(w.amount).toFixed(2)}{' '}
                                         <span className="chip ms-2 bg-brand-soft text-brand capitalize">{w.status}</span>
                                     </p>
-                                    <p className="mt-1 text-sm font-semibold text-ink">{w.user.name}</p>
-                                    <p className="text-sm text-slate-500">
-                                        {w.user.email}
-                                        {w.user.phone ? ` · ${w.user.phone}` : ''}
-                                    </p>
-                                    <p className="mt-1 text-xs text-slate-400">
+                                    <div className="mt-3">
+                                        <AdminPersonCell
+                                            name={w.user.name}
+                                            email={w.user.email}
+                                            avatarUrl={w.user.avatar_url}
+                                            meta={w.user.phone}
+                                        />
+                                    </div>
+                                    <p className="mt-2 text-xs text-slate-400">
                                         Requested {new Date(w.created_at).toLocaleString()}
                                         {w.processed_at && ` · Processed ${new Date(w.processed_at).toLocaleString()}`}
                                         {w.processor && ` · by ${w.processor.name}`}

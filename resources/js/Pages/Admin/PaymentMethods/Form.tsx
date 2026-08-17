@@ -2,14 +2,16 @@ import AdminFormSection from '@/Components/Admin/AdminFormSection';
 import { AdminField, AdminInput } from '@/Components/Admin/AdminField';
 import { IconArrowLeft } from '@/Components/Admin/AdminIcons';
 import CountryCombobox, { CountryOption } from '@/Components/CountryCombobox';
+import PaymentMethodLogo from '@/Components/PaymentMethodLogo';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { ChangeEvent, FormEventHandler, useMemo, useState } from 'react';
 
 type MethodFormData = {
     id: number;
     name: string;
+    logo_url: string | null;
     country_code: string;
     account_title: string;
     bank_name: string;
@@ -29,6 +31,8 @@ export default function AdminPaymentMethodForm({
     const editing = Boolean(method);
     const form = useForm({
         name: method?.name ?? '',
+        logo: null as File | null,
+        remove_logo: false as boolean,
         country_code: method?.country_code ?? countries.find((c) => c.code === 'PK')?.code ?? countries[0]?.code ?? 'PK',
         account_title: method?.account_title ?? '',
         bank_name: method?.bank_name ?? '',
@@ -39,18 +43,25 @@ export default function AdminPaymentMethodForm({
         ...(editing ? { _method: 'put' as const } : {}),
     });
 
+    const [preview, setPreview] = useState<string | null>(null);
+    const logoDisplay = useMemo(
+        () => (form.data.remove_logo ? null : preview ?? method?.logo_url ?? null),
+        [preview, method?.logo_url, form.data.remove_logo],
+    );
+
     const save: FormEventHandler = (e) => {
         e.preventDefault();
         form.transform((data) => ({
             ...data,
             is_active: data.is_active ? '1' : '0',
+            remove_logo: data.remove_logo ? '1' : '0',
         }));
 
         if (editing && method) {
-            form.post(route('admin.payment-methods.update', method.id));
+            form.post(route('admin.payment-methods.update', method.id), { forceFormData: true });
             return;
         }
-        form.post(route('admin.payment-methods.store'));
+        form.post(route('admin.payment-methods.store'), { forceFormData: true });
     };
 
     return (
@@ -95,6 +106,48 @@ export default function AdminPaymentMethodForm({
                                 error={form.errors.country_code}
                                 hint="Only users in this country will see this method on Wallet."
                             />
+
+                            <div className="rounded-2xl border border-brand/10 bg-canvas/60 p-4">
+                                <p className="text-sm font-extrabold text-ink">Bank / wallet logo</p>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    Optional. Use a PNG with a transparent background. Wide logos (JazzCash, EasyPaisa) fit best. Max 2 MB.
+                                </p>
+                                <div className="mt-3 flex flex-wrap items-center gap-4">
+                                    <PaymentMethodLogo src={logoDisplay} name={form.data.name || 'Logo'} size="lg" />
+                                    <div className="flex flex-wrap gap-2">
+                                        <label className="cursor-pointer rounded-2xl border border-brand/15 bg-white px-3.5 py-2 text-sm font-bold text-brand shadow-sm hover:bg-brand-soft">
+                                            Choose logo
+                                            <input
+                                                type="file"
+                                                accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"
+                                                className="sr-only"
+                                                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                                    const file = e.target.files?.[0] ?? null;
+                                                    form.setData('logo', file);
+                                                    form.setData('remove_logo', false);
+                                                    setPreview(file ? URL.createObjectURL(file) : null);
+                                                }}
+                                            />
+                                        </label>
+                                        {logoDisplay && (
+                                            <button
+                                                type="button"
+                                                className="rounded-2xl px-3.5 py-2 text-sm font-bold text-rose-600 hover:bg-rose-50"
+                                                onClick={() => {
+                                                    form.setData('logo', null);
+                                                    form.setData('remove_logo', true);
+                                                    setPreview(null);
+                                                }}
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                                {form.errors.logo && (
+                                    <p className="mt-2 text-xs font-semibold text-rose-600">{form.errors.logo}</p>
+                                )}
+                            </div>
                         </div>
                     </AdminFormSection>
 

@@ -1,4 +1,5 @@
 import { IconArrowLeft, IconPhone } from '@/Components/Admin/AdminIcons';
+import AdminPersonCell from '@/Components/Admin/AdminPersonCell';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -69,8 +70,13 @@ export default function AdminCallShow({ call }: PageProps<{ call: CallDetail }>)
                             <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
                                 {i === 0 ? 'Member' : 'Creator'}
                             </p>
-                            <p className="mt-2 text-lg font-extrabold text-ink">{person.name}</p>
-                            <p className="text-sm text-slate-500">{person.email}</p>
+                            <div className="mt-3">
+                                <AdminPersonCell
+                                    name={person.name}
+                                    email={person.email}
+                                    avatarUrl={person.avatar_url}
+                                />
+                            </div>
                         </div>
                     ))}
                 </div>

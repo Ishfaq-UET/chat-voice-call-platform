@@ -1,5 +1,6 @@
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
+import CountryFlag from '@/Components/CountryFlag';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { PageProps } from '@/types';
@@ -120,11 +121,11 @@ export default function UpdateProfileInformation({
             </header>
 
             {user.country_code && (
-                <p className="mt-4 text-sm text-slate-600">
+                <p className="mt-4 inline-flex flex-wrap items-center gap-2 text-sm text-slate-600">
                     Country:{' '}
+                    <CountryFlag code={user.country_code} title={market?.country_name} className="h-3.5 w-5" />
                     <span className="font-bold text-ink">{market?.country_name ?? user.country_code}</span>
-                    {' · '}
-                    Prices and wallet use {market?.currency_code ?? 'USD'}.
+                    <span>· Prices and wallet use {market?.currency_code ?? 'USD'}.</span>
                 </p>
             )}
 

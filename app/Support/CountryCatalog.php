@@ -83,6 +83,7 @@ class CountryCatalog
             'currency_code' => $country['currency'],
             'currency_symbol' => $country['symbol'],
             'currency_symbol_first' => $country['symbol_first'],
+            'flag' => 'https://flagcdn.com/w40/'.strtolower($code).'.png',
         ];
     }
 
@@ -92,7 +93,9 @@ class CountryCatalog
             fn (array $country) => [
                 'code' => $country['code'],
                 'name' => $country['name'],
-                'label' => trim(($country['emoji'] ?? '').' '.$country['name'].' ('.$country['currency'].')'),
+                'emoji' => $country['emoji'] ?? null,
+                'flag' => 'https://flagcdn.com/w40/'.strtolower($country['code']).'.png',
+                'label' => $country['name'].' ('.$country['currency'].')',
             ],
             static::all(),
         ));

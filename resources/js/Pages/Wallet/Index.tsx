@@ -1,4 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import CountryFlag from '@/Components/CountryFlag';
+import PaymentMethodLogo from '@/Components/PaymentMethodLogo';
 import { formatMoney } from '@/lib/money';
 import { PageProps, Paginated } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
@@ -16,6 +18,7 @@ type Tx = {
 type PaymentMethod = {
     id: number;
     name: string;
+    logo_url: string | null;
     country_code: string;
     account_title: string;
     bank_name: string | null;
@@ -134,7 +137,10 @@ export default function WalletIndex({
 
                 <div className="card-soft p-5 sm:p-6">
                     <h3 className="text-lg font-extrabold text-ink">Add money</h3>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 inline-flex items-center gap-2 text-sm text-slate-500">
+                        {market?.country_code && (
+                            <CountryFlag code={market.country_code} title={market.country_name} className="h-3.5 w-5" />
+                        )}
                         Pay using a local method for {market?.country_name ?? 'your country'}, then submit proof for admin
                         review.
                     </p>
@@ -153,16 +159,19 @@ export default function WalletIndex({
                                             key={m.id}
                                             type="button"
                                             onClick={() => pickMethod(m.id)}
-                                            className={`rounded-2xl border p-4 text-left transition ${
+                                            className={`flex items-center gap-3 rounded-2xl border p-3.5 text-left transition sm:p-4 ${
                                                 isSelected
                                                     ? 'border-brand bg-brand-soft ring-2 ring-brand/30'
                                                     : 'border-brand/15 bg-white hover:border-brand/40'
                                             }`}
                                         >
-                                            <p className="font-extrabold text-ink">{m.name}</p>
-                                            <p className="mt-1 text-xs text-slate-500">
-                                                {m.bank_name || m.account_title}
-                                            </p>
+                                            <PaymentMethodLogo src={m.logo_url} name={m.name} />
+                                            <span className="min-w-0">
+                                                <p className="font-extrabold text-ink">{m.name}</p>
+                                                <p className="mt-0.5 truncate text-xs text-slate-500">
+                                                    {m.bank_name || m.account_title}
+                                                </p>
+                                            </span>
                                         </button>
                                     );
                                 })}
@@ -174,7 +183,10 @@ export default function WalletIndex({
                                         <p className="text-xs font-bold uppercase tracking-wide text-brand/70">
                                             Send payment to
                                         </p>
-                                        <p className="mt-2 text-base font-extrabold text-ink">{selected.name}</p>
+                                        <div className="mt-2 flex items-center gap-3">
+                                            <PaymentMethodLogo src={selected.logo_url} name={selected.name} size="lg" />
+                                            <p className="text-base font-extrabold text-ink">{selected.name}</p>
+                                        </div>
                                         <dl className="mt-3 grid gap-2 sm:grid-cols-2">
                                             <div>
                                                 <dt className="text-[11px] font-bold uppercase tracking-wide text-brand/60">

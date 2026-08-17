@@ -13,7 +13,7 @@ class TransactionController extends Controller
     public function index(Request $request): Response
     {
         $transactions = WalletTransaction::query()
-            ->with(['wallet.user:id,name,email,role'])
+            ->with(['wallet.user:id,name,email,role,avatar'])
             ->when($request->input('type'), fn ($q, $type) => $q->where('type', $type))
             ->when($request->input('q'), function ($q, $search) {
                 $q->where(function ($inner) use ($search) {

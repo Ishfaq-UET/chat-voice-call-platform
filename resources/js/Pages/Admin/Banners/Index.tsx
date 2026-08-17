@@ -1,5 +1,6 @@
 import AdminPageBanner from '@/Components/Admin/AdminPageBanner';
 import { IconBanner, IconPlus } from '@/Components/Admin/AdminIcons';
+import CountryFlag from '@/Components/CountryFlag';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
@@ -91,8 +92,13 @@ export default function AdminBannersIndex({
                                             banner.country_names.slice(0, 4).map((name, index) => (
                                                 <span
                                                     key={banner.country_codes[index]}
-                                                    className="rounded-full bg-brand-soft px-2.5 py-0.5 text-[11px] font-bold text-brand"
+                                                    className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-2.5 py-0.5 text-[11px] font-bold text-brand"
                                                 >
+                                                    <CountryFlag
+                                                        code={banner.country_codes[index]}
+                                                        title={name}
+                                                        className="h-3 w-4"
+                                                    />
                                                     {name}
                                                 </span>
                                             ))

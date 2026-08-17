@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('manual_payment_methods', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('logo_path')->nullable();
             $table->string('country_code', 2)->index();
             $table->string('account_title');
             $table->string('bank_name')->nullable();

@@ -19,6 +19,7 @@ export interface Market {
     currency_code: string;
     currency_symbol: string;
     currency_symbol_first?: boolean;
+    flag?: string;
 }
 
 export interface FemaleProfile {

@@ -2,6 +2,7 @@ import AdminPageBanner from '@/Components/Admin/AdminPageBanner';
 import { AdminField, AdminInput } from '@/Components/Admin/AdminField';
 import ImageLightbox from '@/Components/Admin/ImageLightbox';
 import { IconTopUp } from '@/Components/Admin/AdminIcons';
+import AdminPersonCell from '@/Components/Admin/AdminPersonCell';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps, Paginated, User } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
@@ -140,11 +141,14 @@ export default function AdminTopUpsIndex({
                                             </span>
                                         )}
                                     </p>
-                                    <p className="mt-1 font-semibold text-ink">{item.user.name}</p>
-                                    <p className="text-sm text-slate-500">
-                                        {item.user.email}
-                                        {item.user.phone ? ` · ${item.user.phone}` : ''}
-                                    </p>
+                                    <div className="mt-3">
+                                        <AdminPersonCell
+                                            name={item.user.name}
+                                            email={item.user.email}
+                                            avatarUrl={item.user.avatar_url}
+                                            meta={item.user.phone}
+                                        />
+                                    </div>
 
                                     <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
                                         <div className="rounded-xl bg-canvas px-3 py-2">

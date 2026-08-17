@@ -1,6 +1,8 @@
 import AdminPageBanner from '@/Components/Admin/AdminPageBanner';
 import { AdminField, AdminInput, AdminSelect } from '@/Components/Admin/AdminField';
-import { IconPhone, IconSearch } from '@/Components/Admin/AdminIcons';
+import { IconActivity, IconClock, IconPhone, IconSearch, IconWallet } from '@/Components/Admin/AdminIcons';
+import AdminPersonCell from '@/Components/Admin/AdminPersonCell';
+import AdminStatCard from '@/Components/Admin/AdminStatCard';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps, Paginated } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
@@ -17,8 +19,8 @@ type CallRow = {
     started_at?: string | null;
     ended_at?: string | null;
     created_at: string;
-    male: { id: number; name: string; email: string };
-    female: { id: number; name: string; email: string };
+    male: { id: number; name: string; email: string; avatar_url?: string | null };
+    female: { id: number; name: string; email: string; avatar_url?: string | null };
 };
 
 function formatDuration(seconds: number | null | undefined) {
@@ -69,17 +71,25 @@ export default function AdminCallsIndex({
                 />
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {[
-                        ['Total calls', summary.total],
-                        ['Live / ringing', summary.active + summary.ringing],
-                        ['Total minutes', summary.total_minutes],
-                        ['Commission', `$${Number(summary.total_commission).toFixed(2)}`],
-                    ].map(([label, value]) => (
-                        <div key={label} className="card-soft p-4">
-                            <p className="text-sm text-slate-500">{label}</p>
-                            <p className="mt-1 text-xl font-extrabold text-ink">{value}</p>
-                        </div>
-                    ))}
+                    <AdminStatCard label="Total calls" value={summary.total} icon={IconPhone} />
+                    <AdminStatCard
+                        label="Live / ringing"
+                        value={summary.active + summary.ringing}
+                        icon={IconActivity}
+                        tone="bg-emerald-50 text-emerald-700"
+                    />
+                    <AdminStatCard
+                        label="Total minutes"
+                        value={summary.total_minutes}
+                        icon={IconClock}
+                        tone="bg-sky-50 text-sky-700"
+                    />
+                    <AdminStatCard
+                        label="Commission"
+                        value={`$${Number(summary.total_commission).toFixed(2)}`}
+                        icon={IconWallet}
+                        tone="bg-amber-50 text-amber-700"
+                    />
                 </div>
 
                 <div className="overflow-hidden rounded-[28px] border border-brand/10 bg-white shadow-card">
@@ -126,12 +136,20 @@ export default function AdminCallsIndex({
                                         <td className="px-5 py-4 font-semibold text-ink">#{call.id}</td>
                                         <td className="px-5 py-4 capitalize text-slate-700">{call.type ?? 'audio'}</td>
                                         <td className="px-5 py-4">
-                                            <div className="font-semibold text-ink">{call.male.name}</div>
-                                            <div className="text-xs text-slate-500">{call.male.email}</div>
+                                            <AdminPersonCell
+                                                name={call.male.name}
+                                                email={call.male.email}
+                                                avatarUrl={call.male.avatar_url}
+                                                size="sm"
+                                            />
                                         </td>
                                         <td className="px-5 py-4">
-                                            <div className="font-semibold text-ink">{call.female.name}</div>
-                                            <div className="text-xs text-slate-500">{call.female.email}</div>
+                                            <AdminPersonCell
+                                                name={call.female.name}
+                                                email={call.female.email}
+                                                avatarUrl={call.female.avatar_url}
+                                                size="sm"
+                                            />
                                         </td>
                                         <td className="px-5 py-4 text-slate-700">{formatDuration(call.duration_seconds)}</td>
                                         <td className="px-5 py-4 font-semibold text-ink">

@@ -1,6 +1,8 @@
 import AdminPageBanner from '@/Components/Admin/AdminPageBanner';
 import { AdminField, AdminInput } from '@/Components/Admin/AdminField';
-import { IconChat, IconSearch } from '@/Components/Admin/AdminIcons';
+import { IconChat, IconImage, IconMic, IconSearch } from '@/Components/Admin/AdminIcons';
+import AdminPersonCell from '@/Components/Admin/AdminPersonCell';
+import AdminStatCard from '@/Components/Admin/AdminStatCard';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps, Paginated } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
@@ -15,8 +17,8 @@ type ConversationRow = {
     text_count: number;
     total_charged?: number | string | null;
     total_commission?: number | string | null;
-    male: { id: number; name: string; email: string };
-    female: { id: number; name: string; email: string };
+    male: { id: number; name: string; email: string; avatar_url?: string | null };
+    female: { id: number; name: string; email: string; avatar_url?: string | null };
 };
 
 export default function AdminChatsIndex({
@@ -58,17 +60,10 @@ export default function AdminChatsIndex({
                 />
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {[
-                        ['Conversations', summary.conversations],
-                        ['Messages', summary.messages],
-                        ['Voice notes', summary.voice_notes],
-                        ['Images', summary.images],
-                    ].map(([label, value]) => (
-                        <div key={label} className="card-soft p-4">
-                            <p className="text-sm text-slate-500">{label}</p>
-                            <p className="mt-1 text-xl font-extrabold text-ink">{value}</p>
-                        </div>
-                    ))}
+                    <AdminStatCard label="Conversations" value={summary.conversations} icon={IconChat} />
+                    <AdminStatCard label="Messages" value={summary.messages} icon={IconChat} tone="bg-sky-50 text-sky-700" />
+                    <AdminStatCard label="Voice notes" value={summary.voice_notes} icon={IconMic} tone="bg-fuchsia-50 text-fuchsia-700" />
+                    <AdminStatCard label="Images" value={summary.images} icon={IconImage} tone="bg-amber-50 text-amber-700" />
                 </div>
 
                 <div className="overflow-hidden rounded-[28px] border border-brand/10 bg-white shadow-card">
@@ -100,12 +95,20 @@ export default function AdminChatsIndex({
                                 {conversations.data.map((c) => (
                                     <tr key={c.id} className="hover:bg-brand-soft/40">
                                         <td className="px-5 py-4">
-                                            <div className="font-semibold text-ink">{c.male.name}</div>
-                                            <div className="text-xs text-slate-500">{c.male.email}</div>
+                                            <AdminPersonCell
+                                                name={c.male.name}
+                                                email={c.male.email}
+                                                avatarUrl={c.male.avatar_url}
+                                                size="sm"
+                                            />
                                         </td>
                                         <td className="px-5 py-4">
-                                            <div className="font-semibold text-ink">{c.female.name}</div>
-                                            <div className="text-xs text-slate-500">{c.female.email}</div>
+                                            <AdminPersonCell
+                                                name={c.female.name}
+                                                email={c.female.email}
+                                                avatarUrl={c.female.avatar_url}
+                                                size="sm"
+                                            />
                                         </td>
                                         <td className="px-5 py-4 text-slate-700">
                                             {c.messages_count}

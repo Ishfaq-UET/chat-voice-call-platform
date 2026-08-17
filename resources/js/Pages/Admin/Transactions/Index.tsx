@@ -1,6 +1,8 @@
 import AdminPageBanner from '@/Components/Admin/AdminPageBanner';
 import { AdminField, AdminInput, AdminSelect } from '@/Components/Admin/AdminField';
-import { IconLedger, IconSearch } from '@/Components/Admin/AdminIcons';
+import { IconLedger, IconMoney, IconSearch, IconTopUp, IconWallet } from '@/Components/Admin/AdminIcons';
+import AdminPersonCell from '@/Components/Admin/AdminPersonCell';
+import AdminStatCard from '@/Components/Admin/AdminStatCard';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps, Paginated } from '@/types';
 import { Head, router } from '@inertiajs/react';
@@ -14,7 +16,7 @@ type Txn = {
     description?: string | null;
     created_at: string;
     wallet?: {
-        user?: { id: number; name: string; email: string; role: string } | null;
+        user?: { id: number; name: string; email: string; role: string; avatar_url?: string | null } | null;
     } | null;
 };
 
@@ -51,17 +53,29 @@ export default function AdminTransactionsIndex({
                 />
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {[
-                        ['Top-ups', summary.top_ups],
-                        ['Fees collected', summary.fees],
-                        ['Creator earnings', summary.earnings],
-                        ['Withdrawals', summary.withdrawals],
-                    ].map(([label, value]) => (
-                        <div key={label} className="card-soft p-4">
-                            <p className="text-sm text-slate-500">{label}</p>
-                            <p className="mt-1 text-xl font-extrabold text-ink">${Number(value).toFixed(2)}</p>
-                        </div>
-                    ))}
+                    <AdminStatCard
+                        label="Top-ups"
+                        value={`$${Number(summary.top_ups).toFixed(2)}`}
+                        icon={IconTopUp}
+                        tone="bg-emerald-50 text-emerald-700"
+                    />
+                    <AdminStatCard
+                        label="Fees collected"
+                        value={`$${Number(summary.fees).toFixed(2)}`}
+                        icon={IconMoney}
+                    />
+                    <AdminStatCard
+                        label="Creator earnings"
+                        value={`$${Number(summary.earnings).toFixed(2)}`}
+                        icon={IconLedger}
+                        tone="bg-sky-50 text-sky-700"
+                    />
+                    <AdminStatCard
+                        label="Withdrawals"
+                        value={`$${Number(summary.withdrawals).toFixed(2)}`}
+                        icon={IconWallet}
+                        tone="bg-rose-50 text-rose-600"
+                    />
                 </div>
 
                 <div className="overflow-hidden rounded-[28px] border border-brand/10 bg-white shadow-card">
@@ -106,8 +120,16 @@ export default function AdminTransactionsIndex({
                                 {transactions.data.map((t) => (
                                     <tr key={t.id} className="hover:bg-brand-soft/40">
                                         <td className="px-5 py-4">
-                                            <div className="font-semibold text-ink">{t.wallet?.user?.name ?? '—'}</div>
-                                            <div className="text-xs text-slate-500">{t.wallet?.user?.email}</div>
+                                            {t.wallet?.user ? (
+                                                <AdminPersonCell
+                                                    name={t.wallet.user.name}
+                                                    email={t.wallet.user.email}
+                                                    avatarUrl={t.wallet.user.avatar_url}
+                                                    size="sm"
+                                                />
+                                            ) : (
+                                                '—'
+                                            )}
                                         </td>
                                         <td className="px-5 py-4">
                                             <span className="chip bg-brand-soft text-brand">{t.type}</span>

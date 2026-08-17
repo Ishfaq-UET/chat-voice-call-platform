@@ -1,6 +1,7 @@
 import AdminPageBanner from '@/Components/Admin/AdminPageBanner';
 import { AdminInput } from '@/Components/Admin/AdminField';
 import { IconRename } from '@/Components/Admin/AdminIcons';
+import AdminPersonCell from '@/Components/Admin/AdminPersonCell';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps, Paginated } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
@@ -13,7 +14,7 @@ type NameChange = {
     status: string;
     admin_notes?: string | null;
     created_at: string;
-    user: { id: number; name: string; email: string; role: string };
+    user: { id: number; name: string; email: string; role: string; avatar_url?: string | null };
 };
 
 export default function AdminNameChangesIndex({
@@ -77,10 +78,11 @@ export default function AdminNameChangesIndex({
                         <div key={item.id} className="card-soft p-5">
                             <div className="flex flex-wrap items-start justify-between gap-4">
                                 <div>
-                                    <p className="font-extrabold text-ink">{item.user.name}</p>
-                                    <p className="text-sm text-slate-500">
-                                        {item.user.email} · <span className="capitalize">{item.user.role}</span>
-                                    </p>
+                                    <AdminPersonCell
+                                        name={item.user.name}
+                                        email={`${item.user.email} · ${item.user.role}`}
+                                        avatarUrl={item.user.avatar_url}
+                                    />
                                     <p className="mt-3 text-sm text-slate-600">
                                         <span className="font-semibold text-slate-400">{item.current_name}</span>
                                         <span className="mx-2 text-brand">→</span>

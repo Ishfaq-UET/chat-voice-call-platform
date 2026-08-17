@@ -1,16 +1,36 @@
 import AdminPageBanner from '@/Components/Admin/AdminPageBanner';
-import { IconOverview } from '@/Components/Admin/AdminIcons';
+import AdminAvatar from '@/Components/Admin/AdminAvatar';
+import AdminBarChart from '@/Components/Admin/AdminBarChart';
+import AdminPieChart from '@/Components/Admin/AdminPieChart';
+import {
+    IconActivity,
+    IconChat,
+    IconClock,
+    IconLedger,
+    IconMic,
+    IconMoney,
+    IconOverview,
+    IconPhone,
+    IconRename,
+    IconShield,
+    IconTopUp,
+    IconUsers,
+    IconWallet,
+} from '@/Components/Admin/AdminIcons';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { Head, Link } from '@inertiajs/react';
+import { ComponentType, SVGProps } from 'react';
+
+type IconType = ComponentType<SVGProps<SVGSVGElement>>;
 
 type RecentCall = {
     id: number;
     status: string;
     duration_seconds?: number | null;
     total_charged?: number | string | null;
-    male?: { name: string } | null;
-    female?: { name: string } | null;
+    male?: { name: string; avatar_url?: string | null } | null;
+    female?: { name: string; avatar_url?: string | null } | null;
 };
 
 type RecentMessage = {
@@ -18,11 +38,16 @@ type RecentMessage = {
     type: string;
     body?: string | null;
     amount_charged?: number | string | null;
-    sender?: { name: string; role: string } | null;
+    sender?: { name: string; role: string; avatar_url?: string | null } | null;
 };
+
+type ChartSlice = { label: string; value: number; color: string };
+
+type ActivityPoint = { label: string; calls: number; messages: number; revenue: number };
 
 export default function AdminDashboard({
     stats,
+    charts,
     recentCalls = [],
     recentMessages = [],
 }: PageProps<{
@@ -44,24 +69,29 @@ export default function AdminDashboard({
         call_minutes: number;
         call_revenue: number;
     };
+    charts: {
+        activity: ActivityPoint[];
+        users: ChartSlice[];
+        revenue: ChartSlice[];
+    };
     recentCalls?: RecentCall[];
     recentMessages?: RecentMessage[];
 }>) {
-    const cards = [
-        ['Users', stats.users, route('admin.users')],
-        ['Pending verifications', stats.pending_verifications, route('admin.verifications')],
-        ['Name change requests', stats.pending_name_changes, route('admin.name-changes')],
-        ['Pending withdrawals', stats.pending_withdrawals, route('admin.withdrawals')],
-        ['Pending top-ups', stats.pending_top_ups ?? 0, route('admin.top-ups')],
-        ['Conversations', stats.conversations, route('admin.chats')],
-        ['Voice notes', stats.voice_notes, route('admin.chats')],
-        ['Calls', stats.calls, route('admin.calls')],
-        ['Active / ringing', stats.active_calls, route('admin.calls')],
-        ['Gross revenue', `$${Number(stats.revenue).toFixed(2)}`, route('admin.transactions')],
-        ['Call revenue', `$${Number(stats.call_revenue).toFixed(2)}`, route('admin.calls')],
-        ['Commission', `$${Number(stats.commission).toFixed(2)}`, route('admin.transactions')],
-        ['Call minutes', stats.call_minutes, route('admin.calls')],
-    ] as const;
+    const cards: { label: string; value: string | number; href: string; icon: IconType; tone: string }[] = [
+        { label: 'Users', value: stats.users, href: route('admin.users'), icon: IconUsers, tone: 'bg-violet-50 text-brand' },
+        { label: 'Pending verifications', value: stats.pending_verifications, href: route('admin.verifications'), icon: IconShield, tone: 'bg-amber-50 text-amber-700' },
+        { label: 'Name change requests', value: stats.pending_name_changes, href: route('admin.name-changes'), icon: IconRename, tone: 'bg-sky-50 text-sky-700' },
+        { label: 'Pending withdrawals', value: stats.pending_withdrawals, href: route('admin.withdrawals'), icon: IconWallet, tone: 'bg-rose-50 text-rose-600' },
+        { label: 'Pending top-ups', value: stats.pending_top_ups ?? 0, href: route('admin.top-ups'), icon: IconTopUp, tone: 'bg-emerald-50 text-emerald-700' },
+        { label: 'Conversations', value: stats.conversations, href: route('admin.chats'), icon: IconChat, tone: 'bg-violet-50 text-brand' },
+        { label: 'Voice notes', value: stats.voice_notes, href: route('admin.chats'), icon: IconMic, tone: 'bg-fuchsia-50 text-fuchsia-700' },
+        { label: 'Calls', value: stats.calls, href: route('admin.calls'), icon: IconPhone, tone: 'bg-sky-50 text-sky-700' },
+        { label: 'Active / ringing', value: stats.active_calls, href: route('admin.calls'), icon: IconActivity, tone: 'bg-emerald-50 text-emerald-700' },
+        { label: 'Gross revenue', value: `$${Number(stats.revenue).toFixed(2)}`, href: route('admin.transactions'), icon: IconMoney, tone: 'bg-violet-50 text-brand' },
+        { label: 'Call revenue', value: `$${Number(stats.call_revenue).toFixed(2)}`, href: route('admin.calls'), icon: IconLedger, tone: 'bg-amber-50 text-amber-700' },
+        { label: 'Commission', value: `$${Number(stats.commission).toFixed(2)}`, href: route('admin.transactions'), icon: IconWallet, tone: 'bg-emerald-50 text-emerald-700' },
+        { label: 'Call minutes', value: stats.call_minutes, href: route('admin.calls'), icon: IconClock, tone: 'bg-slate-100 text-slate-600' },
+    ];
 
     return (
         <AdminLayout header="Overview">
@@ -79,12 +109,61 @@ export default function AdminDashboard({
                 />
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {cards.map(([label, value, href]) => (
-                        <Link key={label} href={href} className="card-soft p-5 transition hover:-translate-y-0.5 hover:shadow-soft">
-                            <p className="text-sm font-medium text-slate-500">{label}</p>
-                            <p className="mt-2 text-2xl font-extrabold text-ink">{value}</p>
-                        </Link>
-                    ))}
+                    {cards.map((card) => {
+                        const Icon = card.icon;
+                        return (
+                            <Link
+                                key={card.label}
+                                href={card.href}
+                                className="card-soft p-5 transition hover:-translate-y-0.5 hover:shadow-soft"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <p className="text-sm font-medium text-slate-500">{card.label}</p>
+                                    <span className={`flex h-9 w-9 items-center justify-center rounded-2xl ${card.tone}`}>
+                                        <Icon />
+                                    </span>
+                                </div>
+                                <p className="mt-3 text-2xl font-extrabold text-ink">{card.value}</p>
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                <div className="grid gap-5 lg:grid-cols-3">
+                    <div className="card-soft p-5 lg:col-span-2">
+                        <h2 className="font-extrabold text-ink">Last 7 days</h2>
+                        <p className="mt-1 text-sm text-slate-500">Calls, messages, and fee revenue by day.</p>
+                        <div className="mt-4">
+                            <AdminBarChart
+                                series={['Calls', 'Messages', 'Revenue']}
+                                points={charts.activity.map((d) => ({
+                                    label: d.label,
+                                    values: [d.calls, d.messages, d.revenue],
+                                }))}
+                            />
+                        </div>
+                    </div>
+                    <div className="card-soft p-5">
+                        <h2 className="font-extrabold text-ink">Users</h2>
+                        <p className="mt-1 text-sm text-slate-500">Members vs creators.</p>
+                        <div className="mt-4">
+                            <AdminPieChart slices={charts.users} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card-soft p-5">
+                    <h2 className="font-extrabold text-ink">Revenue mix</h2>
+                    <p className="mt-1 text-sm text-slate-500">Fees collected from chat, voice, calls, and images.</p>
+                    <div className="mt-4 max-w-xl">
+                        <AdminPieChart
+                            slices={charts.revenue.map((s) => ({
+                                ...s,
+                                value: Number(s.value),
+                            }))}
+                            formatValue={(v) => `$${v.toFixed(2)}`}
+                        />
+                    </div>
                 </div>
 
                 <div className="grid gap-5 lg:grid-cols-2">
@@ -103,9 +182,13 @@ export default function AdminDashboard({
                                     className="block rounded-2xl bg-canvas px-4 py-3 transition hover:bg-brand-soft/50"
                                 >
                                     <div className="flex items-center justify-between gap-3">
-                                        <p className="text-sm font-bold text-ink">
-                                            {call.male?.name} → {call.female?.name}
-                                        </p>
+                                        <div className="flex min-w-0 items-center gap-2">
+                                            <AdminAvatar name={call.male?.name ?? 'M'} src={call.male?.avatar_url} size="sm" />
+                                            <AdminAvatar name={call.female?.name ?? 'C'} src={call.female?.avatar_url} size="sm" />
+                                            <p className="truncate text-sm font-bold text-ink">
+                                                {call.male?.name} → {call.female?.name}
+                                            </p>
+                                        </div>
                                         <span className="chip bg-white text-brand capitalize">{call.status}</span>
                                     </div>
                                     <p className="mt-1 text-xs text-slate-500">
@@ -129,12 +212,19 @@ export default function AdminDashboard({
                             {recentMessages.map((msg) => (
                                 <div key={msg.id} className="rounded-2xl bg-canvas px-4 py-3">
                                     <div className="flex items-center justify-between gap-3">
-                                        <p className="text-sm font-bold text-ink">
-                                            {msg.sender?.name}{' '}
-                                            <span className="text-xs font-semibold capitalize text-slate-400">
-                                                · {msg.type}
-                                            </span>
-                                        </p>
+                                        <div className="flex min-w-0 items-center gap-2.5">
+                                            <AdminAvatar
+                                                name={msg.sender?.name ?? 'User'}
+                                                src={msg.sender?.avatar_url}
+                                                size="sm"
+                                            />
+                                            <p className="truncate text-sm font-bold text-ink">
+                                                {msg.sender?.name}{' '}
+                                                <span className="text-xs font-semibold capitalize text-slate-400">
+                                                    · {msg.type}
+                                                </span>
+                                            </p>
+                                        </div>
                                         <span className="text-xs font-semibold text-slate-500">
                                             ${Number(msg.amount_charged ?? 0).toFixed(2)}
                                         </span>

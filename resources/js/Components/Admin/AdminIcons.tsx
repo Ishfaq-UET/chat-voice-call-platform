@@ -161,3 +161,49 @@ export function IconBanner(props: IconProps) {
         </svg>
     );
 }
+
+export function IconMic(props: IconProps) {
+    return (
+        <svg viewBox="0 0 24 24" width="18" height="18" {...base} {...props}>
+            <rect x="9" y="3" width="6" height="11" rx="3" />
+            <path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" />
+        </svg>
+    );
+}
+
+export function IconClock(props: IconProps) {
+    return (
+        <svg viewBox="0 0 24 24" width="18" height="18" {...base} {...props}>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" />
+        </svg>
+    );
+}
+
+export function IconMoney(props: IconProps) {
+    return (
+        <svg viewBox="0 0 24 24" width="18" height="18" {...base} {...props}>
+            <rect x="2" y="6" width="20" height="12" rx="2" />
+            <circle cx="12" cy="12" r="2.5" />
+            <path d="M6 10v4M18 10v4" />
+        </svg>
+    );
+}
+
+export function IconImage(props: IconProps) {
+    return (
+        <svg viewBox="0 0 24 24" width="18" height="18" {...base} {...props}>
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <circle cx="8.5" cy="10" r="1.5" />
+            <path d="M21 16l-5.5-5.5L7 19" />
+        </svg>
+    );
+}
+
+export function IconActivity(props: IconProps) {
+    return (
+        <svg viewBox="0 0 24 24" width="18" height="18" {...base} {...props}>
+            <path d="M22 12h-4l-3 7-6-14-3 7H2" />
+        </svg>
+    );
+}

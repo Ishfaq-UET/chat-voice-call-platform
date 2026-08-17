@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class ManualPaymentMethod extends Model
 {
     protected $fillable = [
         'name',
+        'logo_path',
         'country_code',
         'account_title',
         'bank_name',
@@ -19,12 +21,23 @@ class ManualPaymentMethod extends Model
         'sort_order',
     ];
 
+    protected $appends = [
+        'logo_url',
+    ];
+
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ];
+    }
+
+    public function getLogoUrlAttribute(): ?string
+    {
+        return $this->logo_path
+            ? asset('storage/'.$this->logo_path)
+            : null;
     }
 
     public function topUpRequests(): HasMany
@@ -47,12 +60,20 @@ class ManualPaymentMethod extends Model
         return $query->orderBy('sort_order')->orderBy('name');
     }
 
+    public function deleteLogo(): void
+    {
+        if ($this->logo_path) {
+            Storage::disk('public')->delete($this->logo_path);
+        }
+    }
+
     /** @return array<string, mixed> */
     public function toPublicArray(): array
     {
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'logo_url' => $this->logo_url,
             'country_code' => $this->country_code,
             'account_title' => $this->account_title,
             'bank_name' => $this->bank_name,

@@ -1,3 +1,4 @@
+import CountryFlag from '@/Components/CountryFlag';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import { CountryOption } from '@/Components/CountryCombobox';
@@ -89,8 +90,9 @@ export default function CountryMultiSelect({
                             key={country.code}
                             type="button"
                             onClick={() => toggle(country.code)}
-                            className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand"
+                            className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand"
                         >
+                            <CountryFlag code={country.code} title={country.name} className="h-3 w-4" />
                             {country.name}
                             <span aria-hidden className="text-brand/70">
                                 ×
@@ -192,7 +194,8 @@ export default function CountryMultiSelect({
                                                     </svg>
                                                 )}
                                             </span>
-                                            {country.label}
+                                            <CountryFlag code={country.code} title={country.name} />
+                                            <span className="min-w-0 truncate">{country.label}</span>
                                         </button>
                                     </li>
                                 );

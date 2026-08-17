@@ -1,6 +1,7 @@
 import AdminPageBanner from '@/Components/Admin/AdminPageBanner';
 import { AdminField, AdminInput, AdminSelect } from '@/Components/Admin/AdminField';
 import { IconPlus, IconSearch, IconUsersGroup } from '@/Components/Admin/AdminIcons';
+import AdminPersonCell from '@/Components/Admin/AdminPersonCell';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps, Paginated, User } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
@@ -103,9 +104,12 @@ export default function AdminUsersIndex({
                                 {users.data.map((u) => (
                                     <tr key={u.id} className="transition hover:bg-brand-soft/40">
                                         <td className="px-5 py-4 sm:px-6">
-                                            <div className="font-bold text-ink">{u.name}</div>
-                                            <div className="text-xs text-slate-500">{u.email}</div>
-                                            {u.phone && <div className="text-xs text-slate-400">{u.phone}</div>}
+                                            <AdminPersonCell
+                                                name={u.name}
+                                                email={u.email}
+                                                avatarUrl={u.avatar_url}
+                                                meta={u.phone}
+                                            />
                                         </td>
                                         <td className="px-5 py-4 capitalize text-slate-700 sm:px-6">{u.role}</td>
                                         <td className="px-5 py-4 sm:px-6">

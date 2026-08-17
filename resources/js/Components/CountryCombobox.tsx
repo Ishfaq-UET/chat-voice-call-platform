@@ -1,8 +1,15 @@
+import CountryFlag from '@/Components/CountryFlag';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-export type CountryOption = { code: string; name: string; label: string };
+export type CountryOption = {
+    code: string;
+    name: string;
+    label: string;
+    emoji?: string | null;
+    flag?: string;
+};
 
 type CountryComboboxProps = {
     id?: string;
@@ -79,10 +86,11 @@ export default function CountryCombobox({
                 aria-haspopup="listbox"
                 aria-expanded={open}
                 onClick={() => (open ? setOpen(false) : openDropdown())}
-                className="mt-1 flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm text-ink shadow-sm transition hover:border-slate-300 focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
+                className="mt-1 flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm text-ink shadow-sm transition hover:border-slate-300 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
             >
-                <span className={selected ? 'font-medium' : 'text-slate-400'}>
-                    {selected?.label ?? 'Select your country'}
+                <span className={`flex min-w-0 items-center gap-2.5 ${selected ? 'font-medium' : 'text-slate-400'}`}>
+                    {selected && <CountryFlag code={selected.code} title={selected.name} />}
+                    <span className="truncate">{selected?.label ?? 'Select your country'}</span>
                 </span>
                 <svg
                     className={`h-4 w-4 shrink-0 text-slate-400 transition ${open ? 'rotate-180' : ''}`}
@@ -108,7 +116,7 @@ export default function CountryCombobox({
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Search country…"
-                                className="block w-full rounded-lg border-slate-200 px-3 py-2 text-sm focus:border-coral focus:ring-coral"
+                                className="block w-full rounded-lg border-slate-200 px-3 py-2 text-sm focus:border-brand focus:ring-brand"
                             />
                         </div>
                         <ul
@@ -135,13 +143,14 @@ export default function CountryCombobox({
                                                 setOpen(false);
                                                 setSearch('');
                                             }}
-                                            className={`flex w-full px-3 py-2 text-left text-sm transition ${
+                                            className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition ${
                                                 active
-                                                    ? 'bg-rose-50 font-semibold text-coral-deep'
+                                                    ? 'bg-brand-soft font-semibold text-brand'
                                                     : 'text-slate-700 hover:bg-slate-50'
                                             }`}
                                         >
-                                            {country.label}
+                                            <CountryFlag code={country.code} title={country.name} />
+                                            <span className="min-w-0 truncate">{country.label}</span>
                                         </button>
                                     </li>
                                 );

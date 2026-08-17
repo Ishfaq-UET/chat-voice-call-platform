@@ -1,6 +1,7 @@
 import AdminFormSection from '@/Components/Admin/AdminFormSection';
 import { AdminField, AdminInput, AdminSelect } from '@/Components/Admin/AdminField';
 import { IconArrowLeft, IconUsers } from '@/Components/Admin/AdminIcons';
+import AdminPersonCell from '@/Components/Admin/AdminPersonCell';
 import InputError from '@/Components/InputError';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps, User } from '@/types';
@@ -71,8 +72,16 @@ export default function AdminUsersEdit({
                             </span>
                             Edit User
                         </h1>
+                        <p className="mt-3">
+                            <AdminPersonCell
+                                name={user.name}
+                                email={user.email}
+                                avatarUrl={user.avatar_url}
+                                meta={user.phone}
+                            />
+                        </p>
                         <p className="mt-1.5 text-sm text-slate-500">
-                            Update account details for {user.name}. Leave password blank to keep the current one.
+                            Leave password blank to keep the current one.
                         </p>
                     </div>
                     <Link href={route('admin.users')} className="btn-ghost self-start px-4 py-2.5">

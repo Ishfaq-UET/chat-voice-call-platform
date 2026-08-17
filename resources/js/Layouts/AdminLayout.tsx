@@ -4,6 +4,7 @@ import {
     IconChat,
     IconChevronDown,
     IconLedger,
+    IconMoney,
     IconOverview,
     IconPhone,
     IconRename,
@@ -13,6 +14,7 @@ import {
     IconUsers,
     IconWallet,
 } from '@/Components/Admin/AdminIcons';
+import AdminAvatar from '@/Components/Admin/AdminAvatar';
 import SiteLogo from '@/Components/SiteLogo';
 import { PageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -33,7 +35,7 @@ const adminLinks: {
     { href: 'admin.chats', label: 'Chats & voices', match: 'admin.chats*', icon: IconChat },
     { href: 'admin.calls', label: 'Calls', match: 'admin.calls*', icon: IconPhone },
     { href: 'admin.top-ups', label: 'Top-up requests', match: 'admin.top-ups*', icon: IconTopUp },
-    { href: 'admin.payment-methods', label: 'Payment methods', match: 'admin.payment-methods*', icon: IconWallet },
+    { href: 'admin.payment-methods', label: 'Payment methods', match: 'admin.payment-methods*', icon: IconMoney },
     { href: 'admin.transactions', label: 'Transactions', match: 'admin.transactions*', icon: IconLedger },
     { href: 'admin.withdrawals', label: 'Withdrawals', match: 'admin.withdrawals*', icon: IconWallet },
     { href: 'admin.banners', label: 'Banners', match: 'admin.banners*', icon: IconBanner },
@@ -67,22 +69,15 @@ function NavLink({
             }`}
         >
             {active && <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-brand" />}
-            <Icon className={active ? 'text-brand' : 'text-slate-400'} />
+            <span
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
+                    active ? 'bg-white text-brand shadow-sm' : 'bg-canvas text-slate-500'
+                }`}
+            >
+                <Icon />
+            </span>
             {label}
         </Link>
-    );
-}
-
-function UserAvatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' }) {
-    const initial = name.trim().charAt(0).toUpperCase() || 'A';
-    const sizeClass = size === 'sm' ? 'h-8 w-8 text-xs' : 'h-9 w-9 text-sm';
-
-    return (
-        <span
-            className={`inline-flex shrink-0 items-center justify-center rounded-full bg-brand font-bold text-white shadow-soft ${sizeClass}`}
-        >
-            {initial}
-        </span>
     );
 }
 
@@ -123,7 +118,7 @@ export default function AdminLayout({
 
                     <div className="border-t border-brand/10 p-4">
                         <div className="flex items-center gap-3 rounded-2xl bg-canvas px-3 py-2.5">
-                            <UserAvatar name={user.name} />
+                            <AdminAvatar name={user.name} src={user.avatar_url} />
                             <div className="min-w-0">
                                 <p className="truncate text-sm font-bold text-ink">{user.name}</p>
                                 <p className="truncate text-[11px] capitalize text-slate-400">{user.role}</p>
@@ -152,7 +147,7 @@ export default function AdminLayout({
                                     type="button"
                                     className="inline-flex items-center gap-2.5 rounded-2xl border border-brand/10 bg-white px-2.5 py-1.5 text-left shadow-sm transition hover:bg-brand-soft/50"
                                 >
-                                    <UserAvatar name={user.name} size="sm" />
+                                    <AdminAvatar name={user.name} src={user.avatar_url} size="sm" />
                                     <span className="hidden sm:block">
                                         <span className="block text-sm font-bold text-ink">{user.name}</span>
                                         <span className="block text-[11px] capitalize text-slate-400">{user.role}</span>
