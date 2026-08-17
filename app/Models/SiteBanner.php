@@ -15,7 +15,7 @@ class SiteBanner extends Model
         'image_path',
         'link_url',
         'link_label',
-        'country_code',
+        'country_codes',
         'is_active',
         'starts_at',
         'ends_at',
@@ -24,6 +24,7 @@ class SiteBanner extends Model
     protected function casts(): array
     {
         return [
+            'country_codes' => 'array',
             'is_active' => 'boolean',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
@@ -35,6 +36,26 @@ class SiteBanner extends Model
         return $this->image_path
             ? asset('storage/'.$this->image_path)
             : null;
+    }
+
+    /** @return list<string> */
+    public function targetedCountryCodes(): array
+    {
+        $codes = $this->country_codes ?? [];
+
+        if (! is_array($codes)) {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter(array_map(
+            fn ($code) => strtoupper(trim((string) $code)),
+            $codes,
+        ))));
+    }
+
+    public function isGlobal(): bool
+    {
+        return $this->targetedCountryCodes() === [];
     }
 
     public function scopeActive(Builder $query): Builder
@@ -56,33 +77,32 @@ class SiteBanner extends Model
     }
 
     /**
-     * Prefer a country-specific banner; fall back to a global (null country) banner.
+     * Prefer a country-specific banner; fall back to a global (empty countries) banner.
      *
-     * @return array{id:int,title:?string,message:string,image_url:?string,link_url:?string,link_label:?string,country_code:?string,version:string}|null
+     * @return array{id:int,title:?string,message:string,image_url:?string,link_url:?string,link_label:?string,country_codes:list<string>,version:int}|null
      */
     public static function resolveForRequest(Request $request): ?array
     {
         $country = static::detectCountryCode($request);
-
-        $base = static::query()->active()->currentlyRunning();
-
-        $banner = null;
+        $banners = static::query()
+            ->active()
+            ->currentlyRunning()
+            ->latest('updated_at')
+            ->get();
 
         if ($country) {
-            $banner = (clone $base)
-                ->where('country_code', strtoupper($country))
-                ->latest('updated_at')
-                ->first();
+            $match = $banners->first(
+                fn (self $banner) => in_array($country, $banner->targetedCountryCodes(), true),
+            );
+
+            if ($match) {
+                return $match->toPublicArray();
+            }
         }
 
-        if (! $banner) {
-            $banner = (clone $base)
-                ->whereNull('country_code')
-                ->latest('updated_at')
-                ->first();
-        }
-
-        return $banner?->toPublicArray();
+        return $banners
+            ->first(fn (self $banner) => $banner->isGlobal())
+            ?->toPublicArray();
     }
 
     public function toPublicArray(): array
@@ -94,7 +114,7 @@ class SiteBanner extends Model
             'image_url' => $this->image_url,
             'link_url' => $this->link_url,
             'link_label' => $this->link_label,
-            'country_code' => $this->country_code,
+            'country_codes' => $this->targetedCountryCodes(),
             'version' => $this->updated_at?->timestamp ?? $this->id,
         ];
     }

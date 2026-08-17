@@ -68,7 +68,7 @@ export type PageProps<
         image_url: string | null;
         link_url: string | null;
         link_label: string | null;
-        country_code: string | null;
+        country_codes: string[];
         version: string | number;
     } | null;
 };

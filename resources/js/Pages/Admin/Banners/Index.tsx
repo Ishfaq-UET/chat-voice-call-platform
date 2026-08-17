@@ -11,8 +11,9 @@ type BannerRow = {
     image_url: string | null;
     link_url: string | null;
     link_label: string | null;
-    country_code: string | null;
-    country_name: string;
+    country_codes: string[];
+    country_names: string[];
+    scope_label: string;
     is_active: boolean;
     starts_at: string | null;
     ends_at: string | null;
@@ -34,7 +35,7 @@ export default function AdminBannersIndex({
                         </>
                     }
                     title="Welcome banners"
-                    description="Show a popup when visitors arrive — globally or for a specific country."
+                    description="Show a popup when visitors arrive — globally or for selected countries."
                     meta={`${banners.length} total`}
                     actions={
                         <Link href={route('admin.banners.create')} className="btn-brand inline-flex items-center gap-2 px-4 py-2.5">
@@ -48,7 +49,7 @@ export default function AdminBannersIndex({
                     <div className="rounded-3xl border border-dashed border-brand/20 bg-white px-6 py-16 text-center">
                         <p className="text-lg font-extrabold text-ink">No banners yet</p>
                         <p className="mt-2 text-sm text-slate-500">
-                            Create a global banner for everyone, or a country-specific one (e.g. Pakistan only).
+                            Create a global banner for everyone, or pick multiple countries (e.g. Pakistan and India).
                         </p>
                         <Link href={route('admin.banners.create')} className="btn-brand mt-6 inline-flex px-5 py-2.5">
                             Create first banner
@@ -82,10 +83,25 @@ export default function AdminBannersIndex({
                                         >
                                             {banner.is_active ? 'Active' : 'Off'}
                                         </span>
-                                        <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-[11px] font-bold text-brand">
-                                            {banner.country_name}
-                                            {banner.country_code ? ` (${banner.country_code})` : ''}
-                                        </span>
+                                        {banner.country_codes.length === 0 ? (
+                                            <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-[11px] font-bold text-brand">
+                                                Global
+                                            </span>
+                                        ) : (
+                                            banner.country_names.slice(0, 4).map((name, index) => (
+                                                <span
+                                                    key={banner.country_codes[index]}
+                                                    className="rounded-full bg-brand-soft px-2.5 py-0.5 text-[11px] font-bold text-brand"
+                                                >
+                                                    {name}
+                                                </span>
+                                            ))
+                                        )}
+                                        {banner.country_names.length > 4 && (
+                                            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-bold text-slate-500">
+                                                +{banner.country_names.length - 4}
+                                            </span>
+                                        )}
                                     </div>
                                     <p className="mt-1.5 truncate text-base font-extrabold text-ink">
                                         {banner.title || 'Untitled banner'}

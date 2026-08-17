@@ -1,7 +1,8 @@
 import AdminFormSection from '@/Components/Admin/AdminFormSection';
 import { AdminField, AdminInput } from '@/Components/Admin/AdminField';
 import { IconArrowLeft } from '@/Components/Admin/AdminIcons';
-import CountryCombobox, { CountryOption } from '@/Components/CountryCombobox';
+import { CountryOption } from '@/Components/CountryCombobox';
+import CountryMultiSelect from '@/Components/CountryMultiSelect';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
@@ -14,7 +15,7 @@ type BannerFormData = {
     image_url: string | null;
     link_url: string | null;
     link_label: string | null;
-    country_code: string;
+    country_codes: string[];
     is_active: boolean;
     starts_at: string | null;
     ends_at: string | null;
@@ -35,12 +36,14 @@ export default function AdminBannerForm({
         remove_image: false as boolean,
         link_url: banner?.link_url ?? '',
         link_label: banner?.link_label ?? '',
-        country_code: banner?.country_code ?? '',
+        country_codes: banner?.country_codes ?? [],
         is_active: banner?.is_active ?? true,
         starts_at: banner?.starts_at ?? '',
         ends_at: banner?.ends_at ?? '',
         ...(editing ? { _method: 'put' as const } : {}),
     });
+
+    const isGlobal = form.data.country_codes.length === 0;
 
     const [preview, setPreview] = useState<string | null>(null);
     const imageDisplay = useMemo(
@@ -73,7 +76,7 @@ export default function AdminBannerForm({
                             {editing ? 'Edit banner' : 'Create banner'}
                         </h1>
                         <p className="mt-1 text-sm text-slate-500">
-                            Leave country empty for a global banner shown to everyone. Country banners override the global one for that market.
+                            Leave countries empty for a global banner. Select one or more countries to show it only in those markets.
                         </p>
                     </div>
                     <Link href={route('admin.banners')} className="btn-ghost self-start px-4 py-2.5">
@@ -178,16 +181,16 @@ export default function AdminBannerForm({
                         </div>
                     </AdminFormSection>
 
-                    <AdminFormSection title="Audience & schedule" description="Target everyone (global) or one country.">
+                    <AdminFormSection title="Audience & schedule" description="Target everyone (global) or multiple countries.">
                         <div className="space-y-4">
                             <div>
                                 <label className="mb-1.5 block text-sm font-bold text-ink">Scope</label>
                                 <div className="flex flex-wrap gap-2">
                                     <button
                                         type="button"
-                                        onClick={() => form.setData('country_code', '')}
+                                        onClick={() => form.setData('country_codes', [])}
                                         className={`rounded-2xl px-4 py-2 text-sm font-bold transition ${
-                                            !form.data.country_code
+                                            isGlobal
                                                 ? 'bg-brand text-white'
                                                 : 'bg-white text-slate-600 ring-1 ring-brand/10'
                                         }`}
@@ -197,29 +200,29 @@ export default function AdminBannerForm({
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            if (!form.data.country_code) {
-                                                form.setData('country_code', 'PK');
+                                            if (isGlobal) {
+                                                form.setData('country_codes', ['PK']);
                                             }
                                         }}
                                         className={`rounded-2xl px-4 py-2 text-sm font-bold transition ${
-                                            form.data.country_code
+                                            !isGlobal
                                                 ? 'bg-brand text-white'
                                                 : 'bg-white text-slate-600 ring-1 ring-brand/10'
                                         }`}
                                     >
-                                        Country-specific
+                                        Selected countries
                                     </button>
                                 </div>
                             </div>
 
-                            {form.data.country_code !== '' && (
-                                <CountryCombobox
-                                    label="Country"
+                            {!isGlobal && (
+                                <CountryMultiSelect
+                                    label="Countries"
                                     countries={countries}
-                                    value={form.data.country_code || 'PK'}
-                                    onChange={(code) => form.setData('country_code', code)}
-                                    hint="Only visitors from this country see this banner (logged-in users use their profile country)."
-                                    error={form.errors.country_code}
+                                    value={form.data.country_codes}
+                                    onChange={(codes) => form.setData('country_codes', codes)}
+                                    hint="Visitors from any selected country see this banner. Logged-in users use their profile country."
+                                    error={form.errors.country_codes}
                                 />
                             )}
 
