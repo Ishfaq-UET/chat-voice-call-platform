@@ -43,9 +43,12 @@ function HeroMockup() {
                                     {chat} · {call}
                                 </p>
                             </div>
-                            <button className="rounded-xl bg-brand px-3 py-2 text-xs font-bold text-white">
+                            <Link
+                                href={route('login')}
+                                className="rounded-xl bg-brand px-3 py-2 text-xs font-bold text-white"
+                            >
                                 Chat
-                            </button>
+                            </Link>
                         </div>
                     ))}
                 </div>
@@ -117,7 +120,7 @@ export default function Welcome({ auth }: PageProps) {
                                 </Link>
                             ) : (
                                 <>
-                                    <Link href={route('register')} className="btn-brand">
+                                    <Link href={route('login')} className="btn-brand">
                                         Chat Now →
                                     </Link>
                                     <Link href="/how-it-works" className="btn-ghost">
@@ -220,7 +223,9 @@ export default function Welcome({ auth }: PageProps) {
                                         <p className="text-sm text-slate-500">Late-night talks & soft voice notes</p>
                                     </div>
                                 </div>
-                                <button className="btn-brand mt-5 w-full">Start Chat</button>
+                                <Link href={route('login')} className="btn-brand mt-5 w-full text-center">
+                                    Start Chat
+                                </Link>
                             </div>
                         </div>
                     </div>

@@ -3,7 +3,9 @@ import {
     IconBanner,
     IconChat,
     IconChevronDown,
+    IconClose,
     IconLedger,
+    IconMenu,
     IconMoney,
     IconOverview,
     IconPhone,
@@ -133,12 +135,20 @@ export default function AdminLayout({
                         <div className="flex min-w-0 items-center gap-3">
                             <button
                                 type="button"
-                                className="rounded-2xl bg-brand-soft px-3 py-2 text-sm font-bold text-brand lg:hidden"
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-brand/20 bg-white text-brand shadow-sm transition hover:bg-brand-soft lg:hidden"
+                                aria-label={open ? 'Close navigation' : 'Open navigation'}
+                                aria-expanded={open}
+                                aria-controls="admin-mobile-nav"
                                 onClick={() => setOpen((v) => !v)}
                             >
-                                Menu
+                                {open ? <IconClose /> : <IconMenu />}
                             </button>
-                            <div className="min-w-0 text-lg font-extrabold text-ink">{header}</div>
+                            <div className={`min-w-0 text-lg font-extrabold text-ink ${open ? 'lg:block hidden' : ''}`}>
+                                {header}
+                            </div>
+                            {open && (
+                                <div className="text-lg font-extrabold text-ink lg:hidden">Menu</div>
+                            )}
                         </div>
 
                         <Dropdown>
@@ -166,15 +176,18 @@ export default function AdminLayout({
                     </header>
 
                     {open && (
-                        <div className="space-y-1 border-b border-brand/10 bg-white p-3 lg:hidden">
+                        <nav
+                            id="admin-mobile-nav"
+                            className="flex-1 space-y-1 overflow-y-auto bg-white p-3 lg:hidden"
+                        >
                             {adminLinks.map((item) => (
                                 <NavLink key={item.href} {...item} onNavigate={() => setOpen(false)} />
                             ))}
-                        </div>
+                        </nav>
                     )}
 
                     {(flash?.success || flash?.error) && (
-                        <div className="px-4 pt-4 lg:px-6">
+                        <div className={`px-4 pt-4 lg:px-6 ${open ? 'hidden lg:block' : ''}`}>
                             {flash.success && (
                                 <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
                                     {flash.success}
@@ -188,7 +201,7 @@ export default function AdminLayout({
                         </div>
                     )}
 
-                    <main className="flex-1">{children}</main>
+                    <main className={`flex-1 ${open ? 'hidden lg:block' : ''}`}>{children}</main>
                 </div>
             </div>
         </div>

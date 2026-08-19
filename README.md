@@ -22,8 +22,10 @@ php artisan storage:link
 npm install --legacy-peer-deps
 npm run build
 php artisan serve
-# In another terminal:
+# Realtime (chat + incoming calls):
 php artisan reverb:start
+# Or run the full local stack (HTTP, queue, Vite, Reverb):
+composer dev
 ```
 
 ## Demo accounts (password: `password`)
