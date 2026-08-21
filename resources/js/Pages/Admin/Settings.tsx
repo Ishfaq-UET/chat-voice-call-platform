@@ -11,6 +11,9 @@ type BrandingSettings = {
     min_withdrawal: number;
     logo_url: string | null;
     favicon_url: string | null;
+    contact_email: string;
+    whatsapp_number: string;
+    whatsapp_message: string;
 };
 
 function BrandingUploadCard({
@@ -84,11 +87,17 @@ export default function AdminSettings({
     const form = useForm<{
         commission_percent: number;
         min_withdrawal: number;
+        contact_email: string;
+        whatsapp_number: string;
+        whatsapp_message: string;
         logo: File | null;
         favicon: File | null;
     }>({
         commission_percent: settings.commission_percent,
         min_withdrawal: settings.min_withdrawal,
+        contact_email: settings.contact_email,
+        whatsapp_number: settings.whatsapp_number,
+        whatsapp_message: settings.whatsapp_message,
         logo: null,
         favicon: null,
     });
@@ -123,7 +132,7 @@ export default function AdminSettings({
                             Platform settings
                         </h1>
                         <p className="mt-1.5 text-sm text-slate-500">
-                            Configure branding, commission, and withdrawals.
+                            Configure branding, contact, commission, and withdrawals.
                         </p>
                     </div>
                     <Link href={route('admin.dashboard')} className="btn-ghost self-start px-4 py-2.5">
@@ -168,6 +177,58 @@ export default function AdminSettings({
                                     setFaviconPreview(file ? URL.createObjectURL(file) : null);
                                 }}
                             />
+                        </div>
+                    </AdminFormSection>
+
+                    <AdminFormSection
+                        title="Contact"
+                        description="Email and WhatsApp shown on the contact page. WhatsApp also powers the floating chat icon on the landing page and member dashboards."
+                    >
+                        <div className="grid gap-5">
+                            <AdminField label="Support email" required>
+                                <AdminInput
+                                    type="email"
+                                    value={form.data.contact_email}
+                                    onChange={(e) => form.setData('contact_email', e.target.value)}
+                                />
+                                {form.errors.contact_email && (
+                                    <p className="mt-1.5 text-xs font-semibold text-rose-600">
+                                        {form.errors.contact_email}
+                                    </p>
+                                )}
+                            </AdminField>
+                            <AdminField label="WhatsApp number">
+                                <AdminInput
+                                    type="text"
+                                    placeholder="923001234567"
+                                    value={form.data.whatsapp_number}
+                                    onChange={(e) => form.setData('whatsapp_number', e.target.value)}
+                                />
+                                <p className="mt-1.5 text-xs text-slate-400">
+                                    Full international number with country code, digits only. Pakistan example:{' '}
+                                    <span className="font-semibold text-slate-500">923001234567</span> (not 0300…).
+                                </p>
+                                {form.errors.whatsapp_number && (
+                                    <p className="mt-1.5 text-xs font-semibold text-rose-600">
+                                        {form.errors.whatsapp_number}
+                                    </p>
+                                )}
+                            </AdminField>
+                            <AdminField label="WhatsApp prefilled message">
+                                <AdminInput
+                                    type="text"
+                                    value={form.data.whatsapp_message}
+                                    onChange={(e) => form.setData('whatsapp_message', e.target.value)}
+                                />
+                                <p className="mt-1.5 text-xs text-slate-400">
+                                    Sent as the first message when someone opens the WhatsApp link.
+                                </p>
+                                {form.errors.whatsapp_message && (
+                                    <p className="mt-1.5 text-xs font-semibold text-rose-600">
+                                        {form.errors.whatsapp_message}
+                                    </p>
+                                )}
+                            </AdminField>
                         </div>
                     </AdminFormSection>
 

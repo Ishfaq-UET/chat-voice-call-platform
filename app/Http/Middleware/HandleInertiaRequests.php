@@ -53,6 +53,7 @@ class HandleInertiaRequests extends Middleware
                 'favicon_url' => Setting::faviconUrl(),
                 'app_name' => config('app.name', 'Wyak Dating'),
             ],
+            'contact' => fn () => Setting::contact(),
             'siteBanner' => fn () => SiteBanner::resolveForRequest($request),
         ];
     }

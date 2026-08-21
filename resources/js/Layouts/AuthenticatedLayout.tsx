@@ -3,6 +3,7 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import SiteLogo from '@/Components/SiteLogo';
 import WelcomeBanner from '@/Components/WelcomeBanner';
+import WhatsAppFloat from '@/Components/WhatsAppFloat';
 import { formatAgoraMediaError, requestCallMediaPermission } from '@/lib/callMedia';
 import { formatMoney } from '@/lib/money';
 import { PageProps } from '@/types';
@@ -235,6 +236,7 @@ export default function AuthenticatedLayout({
             )}
 
             <main>{children}</main>
+            <WhatsAppFloat />
         </div>
     );
 }

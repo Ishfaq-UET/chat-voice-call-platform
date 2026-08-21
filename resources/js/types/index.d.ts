@@ -62,6 +62,12 @@ export type PageProps<
         favicon_url: string | null;
         app_name: string;
     };
+    contact?: {
+        email: string;
+        whatsapp_number: string;
+        whatsapp_message: string;
+        whatsapp_url: string | null;
+    };
     siteBanner?: {
         id: number;
         title: string | null;

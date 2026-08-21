@@ -1,5 +1,6 @@
 import SiteLogo from '@/Components/SiteLogo';
 import WelcomeBanner from '@/Components/WelcomeBanner';
+import WhatsAppFloat from '@/Components/WhatsAppFloat';
 import { PageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren } from 'react';
@@ -140,6 +141,7 @@ export default function MarketingLayout({ children }: PropsWithChildren) {
             <SiteHeader />
             <main>{children}</main>
             <SiteFooter />
+            <WhatsAppFloat />
         </div>
     );
 }
