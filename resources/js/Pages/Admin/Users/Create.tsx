@@ -6,9 +6,14 @@ import InputError from '@/Components/InputError';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useMemo } from 'react';
 
-type CountryOption = { code: string; name: string; label: string };
+type CountryOption = {
+    code: string;
+    name: string;
+    label: string;
+    phone_code?: string | null;
+};
 
 export default function AdminUsersCreate({
     countries = [],
@@ -20,10 +25,15 @@ export default function AdminUsersCreate({
         password: '',
         password_confirmation: '',
         role: 'male',
-        country_code: countries[0]?.code ?? 'US',
+        country_code: countries.find((c) => c.code === 'PK')?.code ?? countries[0]?.code ?? 'US',
         bio: '',
         is_banned: false,
     });
+
+    const dialCode = useMemo(() => {
+        const selected = countries.find((c) => c.code === form.data.country_code);
+        return (selected?.phone_code || '').replace(/\D+/g, '') || '1';
+    }, [countries, form.data.country_code]);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -77,12 +87,31 @@ export default function AdminUsersCreate({
                                 />
                                 <InputError message={form.errors.email} className="mt-1.5" />
                             </AdminField>
-                            <AdminField label="Phone Number">
-                                <AdminInput
-                                    value={form.data.phone}
-                                    onChange={(e) => form.setData('phone', e.target.value)}
-                                    placeholder="+1 555 000 0000"
+                            <div className="sm:col-span-2">
+                                <CountryCombobox
+                                    countries={countries}
+                                    value={form.data.country_code}
+                                    onChange={(code) => form.setData('country_code', code)}
+                                    error={form.errors.country_code}
                                 />
+                            </div>
+                            <AdminField label="Phone Number">
+                                <div className="flex overflow-hidden rounded-2xl border border-brand/15 bg-white shadow-sm focus-within:border-brand focus-within:ring-1 focus-within:ring-brand">
+                                    <span className="flex shrink-0 items-center border-r border-brand/10 bg-canvas px-3 text-sm font-bold text-slate-600">
+                                        +{dialCode}
+                                    </span>
+                                    <input
+                                        value={form.data.phone}
+                                        onChange={(e) =>
+                                            form.setData('phone', e.target.value.replace(/[^\d\s-]/g, ''))
+                                        }
+                                        placeholder="3001234567"
+                                        className="w-full border-0 bg-transparent px-3.5 py-2.5 text-sm text-ink placeholder:text-slate-400 focus:outline-none focus:ring-0"
+                                    />
+                                </div>
+                                <p className="mt-1.5 text-xs text-slate-400">
+                                    Local number only — country dial code is taken from the selected country.
+                                </p>
                                 <InputError message={form.errors.phone} className="mt-1.5" />
                             </AdminField>
                             <AdminField label="Role" required>
@@ -95,14 +124,6 @@ export default function AdminUsersCreate({
                                 </AdminSelect>
                                 <InputError message={form.errors.role} className="mt-1.5" />
                             </AdminField>
-                            <div className="sm:col-span-2">
-                                <CountryCombobox
-                                    countries={countries}
-                                    value={form.data.country_code}
-                                    onChange={(code) => form.setData('country_code', code)}
-                                    error={form.errors.country_code}
-                                />
-                            </div>
                             <AdminField label="Password" required>
                                 <AdminInput
                                     type="password"

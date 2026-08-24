@@ -12,7 +12,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -38,17 +37,33 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'phone' => ['required', 'string', 'max:40'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|in:male,female',
             'country_code' => ['required', 'string', 'size:2', CountryCatalog::countryCodeRule()],
         ]);
 
         $countryCode = CountryCatalog::normalize($request->country_code);
+        $phone = CountryCatalog::composePhone($countryCode, $request->phone);
+
+        if ($phone === null) {
+            throw ValidationException::withMessages([
+                'phone' => 'Enter a valid phone number for the selected country (without the country code).',
+            ]);
+        }
+
+        if (User::query()->where('phone', $phone)->exists()) {
+            throw ValidationException::withMessages([
+                'phone' => 'This phone number is already registered.',
+            ]);
+        }
+
         $defaultPrices = CountryCatalog::defaultPrices($countryCode);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $phone,
             'password' => Hash::make($request->password),
             'role' => $request->role,
             'country_code' => $countryCode,

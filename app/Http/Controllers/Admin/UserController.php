@@ -60,13 +60,32 @@ class UserController extends Controller
             'is_banned' => ['sometimes', 'boolean'],
         ]);
 
+        $countryCode = CountryCatalog::normalize($validated['country_code']);
+        $phone = null;
+
+        if (! empty($validated['phone'])) {
+            $phone = CountryCatalog::composePhone($countryCode, $validated['phone']);
+
+            if ($phone === null) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['phone' => 'Enter a valid phone number for the selected country (without the country code).']);
+            }
+
+            if (User::query()->where('phone', $phone)->exists()) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['phone' => 'This phone number is already registered.']);
+            }
+        }
+
         $user = User::query()->create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
+            'phone' => $phone,
             'password' => $validated['password'],
             'role' => $validated['role'],
-            'country_code' => CountryCatalog::normalize($validated['country_code']),
+            'country_code' => $countryCode,
             'bio' => $validated['bio'] ?? null,
             'email_verified_at' => now(),
             'verification_status' => $validated['role'] === 'female' ? 'unverified' : 'approved',
@@ -107,7 +126,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:40'],
+            'phone' => ['nullable', 'string', 'max:40', Rule::unique('users', 'phone')->ignore($user->id)],
             'password' => ['nullable', 'confirmed', Password::defaults()],
             'role' => ['required', Rule::in(['male', 'female'])],
             'bio' => ['nullable', 'string', 'max:2000'],
@@ -118,7 +137,7 @@ class UserController extends Controller
         $payload = [
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
+            'phone' => isset($validated['phone']) ? (preg_replace('/\s+/', '', $validated['phone']) ?: null) : null,
             'role' => $validated['role'],
             'bio' => $validated['bio'] ?? null,
             'verification_status' => $validated['verification_status'],

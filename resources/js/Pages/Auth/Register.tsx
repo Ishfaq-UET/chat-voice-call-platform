@@ -6,9 +6,16 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useMemo } from 'react';
 
-type CountryOption = { code: string; name: string; label: string };
+type CountryOption = {
+    code: string;
+    name: string;
+    label: string;
+    phone_code?: string | null;
+    emoji?: string | null;
+    flag?: string;
+};
 
 export default function Register({
     preferredRole = 'male',
@@ -20,11 +27,18 @@ export default function Register({
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
+        phone: '',
         password: '',
         password_confirmation: '',
         role: preferredRole,
         country_code: countries.find((c) => c.code === 'PK')?.code ?? countries[0]?.code ?? 'US',
     });
+
+    const dialCode = useMemo(() => {
+        const selected = countries.find((c) => c.code === data.country_code);
+        const code = (selected?.phone_code || '').replace(/\D+/g, '');
+        return code || '1';
+    }, [countries, data.country_code]);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -96,8 +110,32 @@ export default function Register({
                     value={data.country_code}
                     onChange={(code) => setData('country_code', code)}
                     error={errors.country_code}
-                    hint={`${countries.length} countries · prices shown in local currency (₹, Rs, £, $, etc.)`}
+                    hint={`${countries.length} countries · dial code and prices follow your country`}
                 />
+
+                <div>
+                    <InputLabel htmlFor="phone" value="Phone number" />
+                    <div className="mt-1 flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm focus-within:border-coral focus-within:ring-2 focus-within:ring-coral/20">
+                        <span className="flex shrink-0 items-center border-r border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-600">
+                            +{dialCode}
+                        </span>
+                        <input
+                            id="phone"
+                            type="tel"
+                            name="phone"
+                            value={data.phone}
+                            autoComplete="tel-national"
+                            placeholder="3001234567"
+                            onChange={(e) => setData('phone', e.target.value.replace(/[^\d\s-]/g, ''))}
+                            required
+                            className="block w-full border-0 bg-transparent px-3 py-2.5 text-sm text-ink placeholder:text-slate-400 focus:outline-none focus:ring-0"
+                        />
+                    </div>
+                    <p className="mt-1.5 text-xs text-slate-400">
+                        Enter your mobile number without the country code. Leading 0 is optional.
+                    </p>
+                    <InputError message={errors.phone} className="mt-2" />
+                </div>
 
                 <div>
                     <InputLabel htmlFor="password" value="Password" />

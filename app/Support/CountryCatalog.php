@@ -8,7 +8,7 @@ use Nnjeim\World\Models\Country;
 
 class CountryCatalog
 {
-    private const CACHE_KEY = 'country_catalog.all';
+    private const CACHE_KEY = 'country_catalog.all.v2';
 
     private const CACHE_TTL = 86400;
 
@@ -95,10 +95,42 @@ class CountryCatalog
                 'name' => $country['name'],
                 'emoji' => $country['emoji'] ?? null,
                 'flag' => 'https://flagcdn.com/w40/'.strtolower($country['code']).'.png',
+                'phone_code' => $country['phone_code'],
                 'label' => $country['name'].' ('.$country['currency'].')',
             ],
             static::all(),
         ));
+    }
+
+    public static function phoneCode(?string $countryCode): string
+    {
+        $code = static::normalize($countryCode);
+        $phoneCode = (string) (static::find($code)['phone_code'] ?? '');
+
+        return preg_replace('/\D+/', '', $phoneCode) ?: '1';
+    }
+
+    /**
+     * Build an international digits-only number from country + national number.
+     * Example: PK + 03001234567 → 923001234567
+     */
+    public static function composePhone(?string $countryCode, ?string $nationalNumber): ?string
+    {
+        $national = preg_replace('/\D+/', '', (string) $nationalNumber) ?? '';
+        $national = ltrim($national, '0');
+
+        if ($national === '') {
+            return null;
+        }
+
+        $dial = static::phoneCode($countryCode);
+        $full = $dial.$national;
+
+        if (strlen($full) < 10 || strlen($full) > 15) {
+            return null;
+        }
+
+        return $full;
     }
 
     public static function formatMoney(float|string $amount, ?string $countryCode): string
@@ -133,6 +165,7 @@ class CountryCatalog
             'code' => strtoupper($country->iso2),
             'name' => $country->name,
             'emoji' => $country->emoji,
+            'phone_code' => preg_replace('/\D+/', '', (string) ($country->phone_code ?? '')) ?: null,
             'currency' => $currency?->code ?? 'USD',
             'symbol' => $symbol,
             'symbol_first' => (bool) ($currency?->symbol_first ?? true),
