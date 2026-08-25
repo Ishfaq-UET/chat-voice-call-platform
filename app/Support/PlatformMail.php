@@ -24,7 +24,8 @@ class PlatformMail
             'transport' => 'brevo',
         ]);
         Config::set('mail.from.address', $mail['from_address']);
-        Config::set('mail.from.name', $mail['from_name']);
+        Config::set('mail.from.name', $mail['from_name'] !== '' ? $mail['from_name'] : Setting::brandName());
+        Config::set('app.name', Setting::brandName());
     }
 
     public static function registerTransport(): void

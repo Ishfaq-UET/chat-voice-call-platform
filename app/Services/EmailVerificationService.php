@@ -44,9 +44,9 @@ class EmailVerificationService
 
         PlatformMail::send($user, new UserStatusMail(
             user: $user,
-            subjectLine: 'Welcome to '.config('app.name'),
+            subjectLine: 'Welcome to '.\App\Models\Setting::brandName(),
             headline: 'Email verified',
-            body: 'Your email is verified. You can now use chat, wallet, and calls on '.config('app.name').'.',
+            body: 'Your email is verified. You can now use chat, wallet, and calls on '.\App\Models\Setting::brandName().'.',
             actionUrl: route('dashboard'),
             actionLabel: 'Open app',
         ));

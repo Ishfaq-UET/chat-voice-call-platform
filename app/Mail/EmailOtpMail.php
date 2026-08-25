@@ -21,7 +21,7 @@ class EmailOtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your verification code — '.config('app.name'),
+            subject: 'Your verification code — '.\App\Models\Setting::brandName(),
         );
     }
 
@@ -32,7 +32,7 @@ class EmailOtpMail extends Mailable
             with: [
                 'name' => $this->user->name,
                 'otp' => $this->otp,
-                'appName' => config('app.name'),
+                'appName' => \App\Models\Setting::brandName(),
             ],
         );
     }

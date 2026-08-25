@@ -39,7 +39,7 @@ class UserStatusMail extends Mailable
                 'body' => $this->body,
                 'actionUrl' => $this->actionUrl,
                 'actionLabel' => $this->actionLabel,
-                'appName' => config('app.name'),
+                'appName' => \App\Models\Setting::brandName(),
             ],
         );
     }

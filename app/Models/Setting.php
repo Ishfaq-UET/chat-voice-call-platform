@@ -146,6 +146,24 @@ class Setting extends Model
         ];
     }
 
+    public static function brandName(): string
+    {
+        $fromName = trim((string) static::getValue('mail_from_name', ''));
+
+        if ($fromName !== '') {
+            return $fromName;
+        }
+
+        $appName = trim((string) config('app.name', 'Wyak Dating'));
+
+        // Legacy name still used on some servers
+        if ($appName === '' || strcasecmp($appName, 'ChatVoiceCall') === 0) {
+            return 'wyakdating';
+        }
+
+        return $appName;
+    }
+
     public static function mailEnabled(): bool
     {
         return filter_var(static::getValue('mail_enabled', false), FILTER_VALIDATE_BOOLEAN);
