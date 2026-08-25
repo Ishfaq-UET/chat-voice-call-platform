@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\UserStatusMail;
 use App\Models\VerificationRequest;
+use App\Support\PlatformMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -53,6 +55,15 @@ class VerificationController extends Controller
 
         $verification->user->update(['verification_status' => 'approved']);
 
+        PlatformMail::send($verification->user, new UserStatusMail(
+            user: $verification->user,
+            subjectLine: 'Creator verification approved',
+            headline: 'You are verified',
+            body: 'Your face verification was approved. You can now appear in Discover and receive chats and calls.',
+            actionUrl: route('female.dashboard'),
+            actionLabel: 'Open creator dashboard',
+        ));
+
         return back()->with('success', 'Verification approved.');
     }
 
@@ -70,6 +81,15 @@ class VerificationController extends Controller
         ]);
 
         $verification->user->update(['verification_status' => 'rejected']);
+
+        PlatformMail::send($verification->user, new UserStatusMail(
+            user: $verification->user,
+            subjectLine: 'Creator verification update',
+            headline: 'Verification was not approved',
+            body: 'Reason: '.$data['rejection_reason'].' You can submit a new verification from your dashboard.',
+            actionUrl: route('female.dashboard'),
+            actionLabel: 'Try again',
+        ));
 
         return back()->with('success', 'Verification rejected.');
     }

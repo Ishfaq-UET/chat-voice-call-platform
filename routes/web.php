@@ -40,7 +40,7 @@ Route::get('/blog/{slug}', [PageController::class, 'blogShow'])->name('blog.show
 
 Route::post('/stripe/webhook', [WalletController::class, 'webhook'])->name('stripe.webhook');
 
-Route::middleware(['auth', 'online'])->group(function () {
+Route::middleware(['auth', 'online', 'verified'])->group(function () {
     Route::get('/dashboard', HomeController::class)->name('dashboard');
     Route::get('/creators/{female}', [CreatorController::class, 'show'])->name('creators.show');
 

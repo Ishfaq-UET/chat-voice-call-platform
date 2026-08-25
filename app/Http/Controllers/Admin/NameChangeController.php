@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\UserStatusMail;
 use App\Models\NameChangeRequest;
+use App\Support\PlatformMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -52,6 +54,15 @@ class NameChangeController extends Controller
             'admin_notes' => null,
         ]);
 
+        PlatformMail::send($nameChange->user, new UserStatusMail(
+            user: $nameChange->user->fresh(),
+            subjectLine: 'Name change approved',
+            headline: 'Your display name was updated',
+            body: 'Your name is now “'.$nameChange->requested_name.'”.',
+            actionUrl: route('profile.edit'),
+            actionLabel: 'View profile',
+        ));
+
         return back()->with('success', 'Name change approved.');
     }
 
@@ -69,6 +80,15 @@ class NameChangeController extends Controller
             'reviewed_by' => $request->user()->id,
             'reviewed_at' => now(),
         ]);
+
+        PlatformMail::send($nameChange->user, new UserStatusMail(
+            user: $nameChange->user,
+            subjectLine: 'Name change rejected',
+            headline: 'Your name change was not approved',
+            body: 'Requested name “'.$nameChange->requested_name.'” was rejected. Note: '.$data['admin_notes'],
+            actionUrl: route('profile.edit'),
+            actionLabel: 'View profile',
+        ));
 
         return back()->with('success', 'Name change rejected.');
     }

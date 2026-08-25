@@ -47,7 +47,12 @@ class RegistrationTest extends TestCase
             'phone' => '923001234567',
             'role' => 'male',
         ]);
-        $response->assertRedirect(route('home', absolute: false));
+        $this->assertDatabaseMissing('users', [
+            'email' => 'test@example.com',
+            'email_verified_at' => now()->toDateTimeString(),
+        ]);
+        $this->assertNull(User::where('email', 'test@example.com')->value('email_verified_at'));
+        $response->assertRedirect(route('verification.notice', absolute: false));
     }
 
     public function test_registration_requires_unique_phone(): void

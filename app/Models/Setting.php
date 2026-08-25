@@ -145,4 +145,41 @@ class Setting extends Model
             'whatsapp_url' => static::whatsappUrl(),
         ];
     }
+
+    public static function mailEnabled(): bool
+    {
+        return filter_var(static::getValue('mail_enabled', false), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    public static function brevoApiKey(): string
+    {
+        return trim((string) static::getValue('brevo_api_key', ''));
+    }
+
+    /**
+     * @return array{
+     *     enabled: bool,
+     *     api_key: string,
+     *     from_address: string,
+     *     from_name: string
+     * }
+     */
+    public static function mail(): array
+    {
+        return [
+            'enabled' => static::mailEnabled(),
+            'api_key' => static::brevoApiKey(),
+            'from_address' => (string) static::getValue('mail_from_address', static::contactEmail()),
+            'from_name' => (string) static::getValue('mail_from_name', config('app.name', 'Wyak Dating')),
+        ];
+    }
+
+    public static function mailIsConfigured(): bool
+    {
+        $mail = static::mail();
+
+        return $mail['enabled']
+            && $mail['api_key'] !== ''
+            && $mail['from_address'] !== '';
+    }
 }

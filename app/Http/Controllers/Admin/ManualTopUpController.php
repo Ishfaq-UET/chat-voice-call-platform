@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\UserStatusMail;
 use App\Models\ManualTopUpRequest;
 use App\Services\WalletService;
+use App\Support\PlatformMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -79,6 +81,17 @@ class ManualTopUpController extends Controller
             'reviewed_at' => now(),
         ]);
 
+        $topUp->loadMissing('user');
+
+        PlatformMail::send($topUp->user, new UserStatusMail(
+            user: $topUp->user,
+            subjectLine: 'Top-up approved',
+            headline: 'Your wallet was credited',
+            body: number_format($amount, 2).' was added to your wallet for top-up request #'.$topUp->id.'.',
+            actionUrl: route('wallet.index'),
+            actionLabel: 'Open wallet',
+        ));
+
         return back()->with('success', '$'.number_format($amount, 2).' credited to '.$topUp->user->name.'.');
     }
 
@@ -96,6 +109,17 @@ class ManualTopUpController extends Controller
             'reviewed_by' => $request->user()->id,
             'reviewed_at' => now(),
         ]);
+
+        $topUp->loadMissing('user');
+
+        PlatformMail::send($topUp->user, new UserStatusMail(
+            user: $topUp->user,
+            subjectLine: 'Top-up rejected',
+            headline: 'Your top-up request was rejected',
+            body: 'Top-up request #'.$topUp->id.' was rejected. Note: '.$data['admin_notes'],
+            actionUrl: route('wallet.index'),
+            actionLabel: 'Open wallet',
+        ));
 
         return back()->with('success', 'Manual top-up request rejected.');
     }

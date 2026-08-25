@@ -14,6 +14,10 @@ type BrandingSettings = {
     contact_email: string;
     whatsapp_number: string;
     whatsapp_message: string;
+    mail_enabled: boolean;
+    brevo_api_key_set: boolean;
+    mail_from_address: string;
+    mail_from_name: string;
 };
 
 function BrandingUploadCard({
@@ -90,6 +94,10 @@ export default function AdminSettings({
         contact_email: string;
         whatsapp_number: string;
         whatsapp_message: string;
+        mail_enabled: boolean;
+        brevo_api_key: string;
+        mail_from_address: string;
+        mail_from_name: string;
         logo: File | null;
         favicon: File | null;
     }>({
@@ -98,6 +106,10 @@ export default function AdminSettings({
         contact_email: settings.contact_email,
         whatsapp_number: settings.whatsapp_number,
         whatsapp_message: settings.whatsapp_message,
+        mail_enabled: settings.mail_enabled,
+        brevo_api_key: '',
+        mail_from_address: settings.mail_from_address || settings.contact_email,
+        mail_from_name: settings.mail_from_name || '',
         logo: null,
         favicon: null,
     });
@@ -229,6 +241,66 @@ export default function AdminSettings({
                                     </p>
                                 )}
                             </AdminField>
+                        </div>
+                    </AdminFormSection>
+
+                    <AdminFormSection
+                        title="Email (Brevo)"
+                        description="Paste your Brevo API key and enable email. OTP, status updates, and password resets are sent through Brevo’s API."
+                    >
+                        <div className="space-y-5">
+                            <label className="flex items-center gap-2.5 text-sm font-semibold text-ink">
+                                <input
+                                    type="checkbox"
+                                    checked={form.data.mail_enabled}
+                                    onChange={(e) => form.setData('mail_enabled', e.target.checked)}
+                                    className="rounded border-brand/20 text-brand focus:ring-brand"
+                                />
+                                Enable Brevo email sending
+                            </label>
+
+                            <AdminField label="Brevo API key">
+                                <AdminInput
+                                    type="password"
+                                    value={form.data.brevo_api_key}
+                                    onChange={(e) => form.setData('brevo_api_key', e.target.value)}
+                                    placeholder={
+                                        settings.brevo_api_key_set
+                                            ? '•••••••• (leave blank to keep current key)'
+                                            : 'xkeysib-…'
+                                    }
+                                    autoComplete="new-password"
+                                />
+                                <p className="mt-1.5 text-xs text-slate-400">
+                                    Brevo → SMTP &amp; API → API keys. Never commit this key to git.
+                                </p>
+                                {form.errors.brevo_api_key && (
+                                    <p className="mt-1.5 text-xs font-semibold text-rose-600">
+                                        {form.errors.brevo_api_key}
+                                    </p>
+                                )}
+                            </AdminField>
+
+                            <div className="grid gap-5 sm:grid-cols-2">
+                                <AdminField label="From name">
+                                    <AdminInput
+                                        value={form.data.mail_from_name}
+                                        onChange={(e) => form.setData('mail_from_name', e.target.value)}
+                                        placeholder="Wyak Dating"
+                                    />
+                                </AdminField>
+                                <AdminField label="From email">
+                                    <AdminInput
+                                        type="email"
+                                        value={form.data.mail_from_address}
+                                        onChange={(e) => form.setData('mail_from_address', e.target.value)}
+                                        placeholder="noreply@yourdomain.com"
+                                    />
+                                    <p className="mt-1.5 text-xs text-slate-400">
+                                        Must be a verified sender in Brevo.
+                                    </p>
+                                </AdminField>
+                            </div>
                         </div>
                     </AdminFormSection>
 

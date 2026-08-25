@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\UserStatusMail;
 use App\Models\FemaleProfile;
 use App\Models\User;
 use App\Services\WalletService;
 use App\Support\CountryCatalog;
+use App\Support\PlatformMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -174,6 +176,17 @@ class UserController extends Controller
         abort_if($user->isAdmin(), 403);
 
         $user->update(['is_banned' => ! $user->is_banned]);
+
+        PlatformMail::send($user, new UserStatusMail(
+            user: $user,
+            subjectLine: $user->is_banned ? 'Account suspended' : 'Account reinstated',
+            headline: $user->is_banned ? 'Your account was banned' : 'Your account is active again',
+            body: $user->is_banned
+                ? 'An administrator suspended your account. Contact support if you believe this is a mistake.'
+                : 'An administrator reinstated your account. You can sign in and use the platform again.',
+            actionUrl: route('contact'),
+            actionLabel: 'Contact support',
+        ));
 
         return back()->with('success', $user->is_banned ? 'User banned.' : 'User unbanned.');
     }

@@ -122,6 +122,15 @@ class WalletController extends Controller
                     $wallets->credit($user, $amount, 'top_up', 'Stripe wallet top-up', meta: [
                         'stripe_session' => $object->id ?? null,
                     ]);
+
+                    \App\Support\PlatformMail::send($user, new \App\Mail\UserStatusMail(
+                        user: $user,
+                        subjectLine: 'Wallet top-up successful',
+                        headline: 'Payment received',
+                        body: number_format($amount, 2).' was added to your wallet via Stripe.',
+                        actionUrl: route('wallet.index'),
+                        actionLabel: 'Open wallet',
+                    ));
                 }
             }
         } catch (\Throwable $e) {

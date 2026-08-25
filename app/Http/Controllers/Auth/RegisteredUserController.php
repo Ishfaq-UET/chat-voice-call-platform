@@ -67,7 +67,7 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'role' => $request->role,
             'country_code' => $countryCode,
-            'email_verified_at' => now(),
+            'email_verified_at' => null,
             'verification_status' => $request->role === 'female' ? 'unverified' : 'approved',
         ]);
 
@@ -86,14 +86,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        if ($user->isAdmin()) {
-            return redirect()->route('admin.dashboard');
-        }
-
-        if ($user->isFemale()) {
-            return redirect()->route('female.dashboard');
-        }
-
-        return redirect()->route('home');
+        return redirect()->route('verification.notice');
     }
 }

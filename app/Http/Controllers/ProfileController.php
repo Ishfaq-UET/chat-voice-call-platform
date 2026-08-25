@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\NameChangeRequest;
+use App\Services\EmailVerificationService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +28,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request, EmailVerificationService $verification): RedirectResponse
     {
         $user = $request->user();
         $validated = $request->validated();
@@ -53,11 +54,21 @@ class ProfileController extends Controller
 
         $user->fill($validated);
 
-        if ($user->isDirty('email')) {
+        $emailChanged = $user->isDirty('email');
+
+        if ($emailChanged) {
             $user->email_verified_at = null;
+            $user->email_otp_hash = null;
+            $user->email_otp_expires_at = null;
         }
 
         $user->save();
+
+        if ($emailChanged && ! $user->isAdmin()) {
+            $verification->issueAndSend($user->fresh());
+
+            return Redirect::route('verification.notice');
+        }
 
         return Redirect::route('profile.edit')->with('status', $status);
     }

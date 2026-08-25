@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\UserStatusMail;
 use App\Models\Withdrawal;
 use App\Services\WalletService;
+use App\Support\PlatformMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -58,6 +60,18 @@ class WithdrawalController extends Controller
             'processed_at' => now(),
         ]);
 
+        $withdrawal->loadMissing('user');
+
+        PlatformMail::send($withdrawal->user, new UserStatusMail(
+            user: $withdrawal->user,
+            subjectLine: 'Withdrawal paid',
+            headline: 'Your withdrawal was paid',
+            body: 'Withdrawal #'.$withdrawal->id.' for '.$withdrawal->amount.' has been marked as paid.'
+                .(! empty($data['payment_reference']) ? ' Reference: '.$data['payment_reference'].'.' : ''),
+            actionUrl: route('female.withdrawals'),
+            actionLabel: 'View withdrawals',
+        ));
+
         return back()->with('success', 'Withdrawal marked as manually paid.');
     }
 
@@ -83,6 +97,15 @@ class WithdrawalController extends Controller
             'Withdrawal #'.$withdrawal->id.' rejected — refunded',
             $withdrawal,
         );
+
+        PlatformMail::send($withdrawal->user, new UserStatusMail(
+            user: $withdrawal->user,
+            subjectLine: 'Withdrawal rejected',
+            headline: 'Your withdrawal was rejected',
+            body: 'Withdrawal #'.$withdrawal->id.' was rejected and the amount was refunded to your wallet. Note: '.$data['admin_notes'],
+            actionUrl: route('female.withdrawals'),
+            actionLabel: 'View withdrawals',
+        ));
 
         return back()->with('success', 'Withdrawal rejected and amount refunded to wallet.');
     }
