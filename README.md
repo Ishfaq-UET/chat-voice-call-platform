@@ -17,12 +17,15 @@ cp .env.example .env   # if needed
 php artisan key:generate
 touch database/database.sqlite
 php artisan migrate --seed
+php artisan db:seed --class=WorldSeeder   # if countries table is empty
 php artisan storage:link
 npm install --legacy-peer-deps
 npm run build
 php artisan serve
-# In another terminal:
+# Realtime (chat + incoming calls):
 php artisan reverb:start
+# Or run the full local stack (HTTP, queue, Vite, Reverb):
+composer dev
 ```
 
 ## Demo accounts (password: `password`)

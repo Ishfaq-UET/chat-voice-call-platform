@@ -43,7 +43,7 @@ class PageController extends Controller
             'title' => 'Terms of use',
             'updated' => 'July 2026',
             'sections' => [
-                ['heading' => 'Eligibility', 'body' => 'You must be 18 or older to create an account and use ChatVoiceCall. By registering you confirm you meet this requirement.'],
+                ['heading' => 'Eligibility', 'body' => 'You must be 18 or older to create an account and use Wyak Dating. By registering you confirm you meet this requirement.'],
                 ['heading' => 'Accounts & roles', 'body' => 'Members (male) and creators (female) have different permissions. Roles chosen at signup cannot be changed without contacting support.'],
                 ['heading' => 'Payments & wallets', 'body' => 'Members fund a wallet and are charged for messages, voice notes, and call minutes at the creator’s published rates. Platform commission is deducted from creator earnings.'],
                 ['heading' => 'Creator verification', 'body' => 'Creators must complete face verification before appearing in Discover. False or misleading identity materials may result in permanent ban.'],
@@ -63,7 +63,7 @@ class PageController extends Controller
                 ['heading' => 'How we use data', 'body' => 'To provide chat/call services, process payments and withdrawals, moderate safety issues, improve the product, and communicate account notices.'],
                 ['heading' => 'Sharing', 'body' => 'We share data with payment processors, cloud storage, and voice infrastructure providers only as needed to run the product. We do not sell personal data.'],
                 ['heading' => 'Retention', 'body' => 'Wallet ledgers are kept for financial integrity. Media and chat content may be removed upon request subject to legal retention needs.'],
-                ['heading' => 'Your choices', 'body' => 'You can update profile details, request account deletion, and contact support at support@chatvoicecall.local for privacy questions.'],
+                ['heading' => 'Your choices', 'body' => 'You can update profile details, request account deletion, and contact support at support@wyakdating.local for privacy questions.'],
             ],
         ]);
     }
@@ -86,7 +86,7 @@ class PageController extends Controller
     {
         return Inertia::render('Pages/Simple', [
             'title' => 'Careers',
-            'intro' => 'We’re building a safer paid chat & voice platform. We’re not hiring full-time yet — send an introduction to careers@chatvoicecall.local if you want to stay on our radar.',
+            'intro' => 'We’re building a safer paid chat & voice platform. We’re not hiring full-time yet — send an introduction to careers@wyakdating.local if you want to stay on our radar.',
             'body' => 'Roles we expect to open: product design, moderation operations, and mobile engineering.',
         ]);
     }

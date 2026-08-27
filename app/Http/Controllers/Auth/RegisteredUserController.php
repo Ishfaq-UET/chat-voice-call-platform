@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FemaleProfile;
 use App\Models\User;
 use App\Services\WalletService;
+use App\Support\CountryCatalog;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ class RegisteredUserController extends Controller
 
         return Inertia::render('Auth/Register', [
             'preferredRole' => $role,
+            'countries' => CountryCatalog::optionsForSelect(),
         ]);
     }
 
@@ -35,16 +37,37 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'phone' => ['required', 'string', 'max:40'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|in:male,female',
+            'country_code' => ['required', 'string', 'size:2', CountryCatalog::countryCodeRule()],
         ]);
+
+        $countryCode = CountryCatalog::normalize($request->country_code);
+        $phone = CountryCatalog::composePhone($countryCode, $request->phone);
+
+        if ($phone === null) {
+            throw ValidationException::withMessages([
+                'phone' => 'Enter a valid phone number for the selected country (without the country code).',
+            ]);
+        }
+
+        if (User::query()->where('phone', $phone)->exists()) {
+            throw ValidationException::withMessages([
+                'phone' => 'This phone number is already registered.',
+            ]);
+        }
+
+        $defaultPrices = CountryCatalog::defaultPrices($countryCode);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $phone,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-            'email_verified_at' => now(),
+            'country_code' => $countryCode,
+            'email_verified_at' => null,
             'verification_status' => $request->role === 'female' ? 'unverified' : 'approved',
         ]);
 
@@ -53,9 +76,9 @@ class RegisteredUserController extends Controller
         if ($user->isFemale()) {
             FemaleProfile::query()->create([
                 'user_id' => $user->id,
-                'chat_price' => 1.00,
-                'voice_price' => 2.00,
-                'call_price_per_minute' => 5.00,
+                'chat_price' => $defaultPrices['chat'],
+                'voice_price' => $defaultPrices['voice'],
+                'call_price_per_minute' => $defaultPrices['call'],
             ]);
         }
 
@@ -63,14 +86,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        if ($user->isAdmin()) {
-            return redirect()->route('admin.dashboard');
-        }
-
-        if ($user->isFemale()) {
-            return redirect()->route('female.dashboard');
-        }
-
-        return redirect()->route('home');
+        return redirect()->route('verification.notice');
     }
 }

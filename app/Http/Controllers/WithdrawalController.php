@@ -21,6 +21,7 @@ class WithdrawalController extends Controller
             'withdrawals' => $user->withdrawals()->latest()->paginate(15),
             'walletBalance' => (float) $wallets->ensureWallet($user)->balance,
             'minWithdrawal' => Setting::minWithdrawal(),
+            'hasPending' => $user->withdrawals()->where('status', 'pending')->exists(),
             'bank' => [
                 'bank_name' => $user->femaleProfile?->bank_name,
                 'bank_account' => $user->femaleProfile?->bank_account,
@@ -34,17 +35,25 @@ class WithdrawalController extends Controller
         $user = $request->user()->load('femaleProfile');
         abort_unless($user->isFemale(), 403);
 
+        if ($user->withdrawals()->where('status', 'pending')->exists()) {
+            return back()->withErrors([
+                'amount' => 'You already have a pending withdrawal. Wait for it to be processed.',
+            ]);
+        }
+
         $min = Setting::minWithdrawal();
         $data = $request->validate([
             'amount' => ['required', 'numeric', "min:{$min}"],
         ]);
 
         $profile = $user->femaleProfile;
-        if (! $profile?->bank_account) {
-            return back()->withErrors(['amount' => 'Please save bank details first.']);
+        if (! $profile?->bank_name || ! $profile?->bank_account || ! $profile?->bank_holder) {
+            return back()->withErrors([
+                'amount' => 'Please save complete bank details on your dashboard before withdrawing.',
+            ]);
         }
 
-        $amount = (float) $data['amount'];
+        $amount = round((float) $data['amount'], 2);
 
         try {
             $withdrawal = Withdrawal::query()->create([
@@ -56,11 +65,20 @@ class WithdrawalController extends Controller
                 'bank_holder' => $profile->bank_holder,
             ]);
 
-            $wallets->debit($user, $amount, 'withdrawal', 'Withdrawal request #'.$withdrawal->id, $withdrawal);
+            $wallets->debit(
+                $user,
+                $amount,
+                'withdrawal',
+                'Manual withdrawal request #'.$withdrawal->id,
+                $withdrawal,
+            );
         } catch (RuntimeException $e) {
             return back()->withErrors(['amount' => $e->getMessage()]);
         }
 
-        return back()->with('success', 'Withdrawal request submitted.');
+        return back()->with(
+            'success',
+            'Withdrawal requested. An admin will transfer funds to your bank account manually.',
+        );
     }
 }

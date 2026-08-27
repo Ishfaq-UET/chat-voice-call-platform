@@ -7,6 +7,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
 use App\Services\WalletService;
+use App\Support\SafeBroadcast;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -38,6 +39,7 @@ class ChatController extends Controller
         $male = $request->user();
         abort_unless($male->isMale(), 403);
         abort_unless($female->isVerifiedFemale(), 404);
+        abort_unless($female->sameCountryAs($male), 404);
 
         $conversation = Conversation::query()->firstOrCreate([
             'male_id' => $male->id,
@@ -184,7 +186,7 @@ class ChatController extends Controller
 
             $conversation->update(['last_message_at' => now()]);
 
-            broadcast(new MessageSent($message->fresh('sender')))->toOthers();
+            SafeBroadcast::dispatch(new MessageSent($message->fresh('sender')), true);
         } catch (RuntimeException $e) {
             return back()->withErrors(['balance' => $e->getMessage()]);
         }

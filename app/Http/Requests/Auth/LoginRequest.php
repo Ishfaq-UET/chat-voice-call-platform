@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -47,6 +48,26 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
+            ]);
+        }
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($user->isAdmin()) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Invalid Credentials',
+            ]);
+        }
+
+        if ($user->is_banned) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Your account has been banned. please contact support',
             ]);
         }
 

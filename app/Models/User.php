@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -28,14 +29,18 @@ class User extends Authenticatable
         'avatar',
         'bio',
         'phone',
+        'country_code',
         'verification_status',
         'online_at',
         'is_banned',
+        'email_otp_hash',
+        'email_otp_expires_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'email_otp_hash',
     ];
 
     protected $appends = [
@@ -47,10 +52,28 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'email_otp_expires_at' => 'datetime',
             'password' => 'hashed',
             'online_at' => 'datetime',
             'is_banned' => 'boolean',
         ];
+    }
+
+    /**
+     * Admins are treated as verified for middleware purposes.
+     */
+    public function hasVerifiedEmail(): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        return $this->email_verified_at !== null;
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        app(\App\Services\EmailVerificationService::class)->issueAndSend($this);
     }
 
     public function getAvatarUrlAttribute(): ?string
@@ -91,6 +114,16 @@ class User extends Authenticatable
         return $this->isFemale() && $this->verification_status === 'approved';
     }
 
+    public function sameCountryAs(User $other): bool
+    {
+        return strtoupper((string) $this->country_code) === strtoupper((string) $other->country_code);
+    }
+
+    public function scopeInCountry($query, ?string $countryCode)
+    {
+        return $query->where('country_code', strtoupper((string) $countryCode));
+    }
+
     public function femaleProfile(): HasOne
     {
         return $this->hasOne(FemaleProfile::class);
@@ -109,5 +142,15 @@ class User extends Authenticatable
     public function withdrawals(): HasMany
     {
         return $this->hasMany(Withdrawal::class);
+    }
+
+    public function nameChangeRequests(): HasMany
+    {
+        return $this->hasMany(NameChangeRequest::class);
+    }
+
+    public function manualTopUpRequests(): HasMany
+    {
+        return $this->hasMany(ManualTopUpRequest::class);
     }
 }
