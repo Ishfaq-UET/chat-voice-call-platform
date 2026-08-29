@@ -1,8 +1,5 @@
-import { PageProps } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { type ReactNode } from 'react';
-
-const DEFAULT_WHATSAPP_URL = 'https://api.whatsapp.com/send?phone=923226984534';
 
 function WhatsAppIcon({ className = 'h-6 w-6' }: { className?: string }) {
     return (
@@ -122,9 +119,8 @@ function ContentSection({
     );
 }
 
-export default function Ad() {
-    const contact = usePage<PageProps>().props.contact;
-    const whatsappUrl = contact?.whatsapp_url || DEFAULT_WHATSAPP_URL;
+export default function Ad({ whatsapp_url }: { whatsapp_url: string | null }) {
+    const whatsappUrl = whatsapp_url;
 
     return (
         <>
@@ -150,12 +146,18 @@ export default function Ad() {
                             Read the details below carefully, then contact us on WhatsApp to take the next step.
                         </p>
                         <div className="mt-8 2xl:hidden">
-                            <WhatsAppCta href={whatsappUrl} size="large" className="mx-auto max-w-md" />
+                            {whatsappUrl ? (
+                                <WhatsAppCta href={whatsappUrl} size="large" className="mx-auto max-w-md" />
+                            ) : (
+                                <p className="text-lg font-semibold text-slate-500">
+                                    WhatsApp contact is not configured yet.
+                                </p>
+                            )}
                         </div>
                     </header>
 
                     <div className="flex items-start justify-center gap-8 2xl:gap-10">
-                        <SideCta href={whatsappUrl} side="left" />
+                        {whatsappUrl && <SideCta href={whatsappUrl} side="left" />}
 
                         <main className="min-w-0 w-full max-w-4xl flex-1 space-y-8 sm:space-y-10">
                             <ContentSection title="English">
@@ -201,29 +203,31 @@ export default function Ad() {
                                 </p>
                             </ContentSection>
 
-                            <section className="rounded-[32px] border-2 border-[#25D366]/20 bg-gradient-to-br from-[#25D366]/10 via-white to-[#25D366]/5 px-7 py-10 text-center sm:px-12 sm:py-14">
-                                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_16px_40px_-12px_rgba(37,211,102,0.6)]">
-                                    <WhatsAppIcon className="h-14 w-14" />
-                                </div>
-                                <h2 className="mt-6 text-3xl font-extrabold text-ink sm:text-4xl">
-                                    Ready to get started?
-                                </h2>
-                                <p className="mx-auto mt-4 max-w-2xl text-xl leading-relaxed text-slate-600 sm:text-2xl">
-                                    Click the button below to open WhatsApp and speak with our official company
-                                    representative.
-                                </p>
-                                <div className="mt-8 flex justify-center">
-                                    <WhatsAppCta
-                                        href={whatsappUrl}
-                                        label="Contact on WhatsApp"
-                                        size="large"
-                                        className="max-w-lg"
-                                    />
-                                </div>
-                            </section>
+                            {whatsappUrl && (
+                                <section className="rounded-[32px] border-2 border-[#25D366]/20 bg-gradient-to-br from-[#25D366]/10 via-white to-[#25D366]/5 px-7 py-10 text-center sm:px-12 sm:py-14">
+                                    <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_16px_40px_-12px_rgba(37,211,102,0.6)]">
+                                        <WhatsAppIcon className="h-14 w-14" />
+                                    </div>
+                                    <h2 className="mt-6 text-3xl font-extrabold text-ink sm:text-4xl">
+                                        Ready to get started?
+                                    </h2>
+                                    <p className="mx-auto mt-4 max-w-2xl text-xl leading-relaxed text-slate-600 sm:text-2xl">
+                                        Click the button below to open WhatsApp and speak with our official company
+                                        representative.
+                                    </p>
+                                    <div className="mt-8 flex justify-center">
+                                        <WhatsAppCta
+                                            href={whatsappUrl}
+                                            label="Contact on WhatsApp"
+                                            size="large"
+                                            className="max-w-lg"
+                                        />
+                                    </div>
+                                </section>
+                            )}
                         </main>
 
-                        <SideCta href={whatsappUrl} side="right" />
+                        {whatsappUrl && <SideCta href={whatsappUrl} side="right" />}
                     </div>
                 </div>
             </div>

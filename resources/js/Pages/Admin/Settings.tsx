@@ -14,6 +14,8 @@ type BrandingSettings = {
     contact_email: string;
     whatsapp_number: string;
     whatsapp_message: string;
+    ad_whatsapp_number: string;
+    ad_whatsapp_message: string;
     mail_enabled: boolean;
     brevo_api_key_set: boolean;
     mail_from_address: string;
@@ -100,9 +102,19 @@ function buildWhatsAppLink(number: string, message: string): string | null {
     return `https://api.whatsapp.com/send?${params.toString()}`;
 }
 
-function WhatsAppLinkGenerator() {
-    const [number, setNumber] = useState('');
-    const [message, setMessage] = useState('');
+function WhatsAppLinkGenerator({
+    number,
+    message,
+    onNumberChange,
+    onMessageChange,
+    numberError,
+}: {
+    number: string;
+    message: string;
+    onNumberChange: (value: string) => void;
+    onMessageChange: (value: string) => void;
+    numberError?: string;
+}) {
     const [copied, setCopied] = useState(false);
 
     const link = useMemo(() => buildWhatsAppLink(number, message), [number, message]);
@@ -130,7 +142,7 @@ function WhatsAppLinkGenerator() {
     return (
         <AdminFormSection
             title="WhatsApp link generator"
-            description="Enter any international number and get a shareable WhatsApp link. Click the link or Copy to use it."
+            description="Generate the WhatsApp link used on the /ad page. Click Save settings at the bottom after entering the number."
         >
             <div className="grid gap-5">
                 <AdminField label="WhatsApp number">
@@ -140,12 +152,15 @@ function WhatsAppLinkGenerator() {
                         value={number}
                         onChange={(e) => {
                             setCopied(false);
-                            setNumber(e.target.value);
+                            onNumberChange(e.target.value);
                         }}
                     />
                     <p className="mt-1.5 text-xs text-slate-400">
                         Country code + number, digits only. Example: 923001234567
                     </p>
+                    {numberError && (
+                        <p className="mt-1.5 text-xs font-semibold text-rose-600">{numberError}</p>
+                    )}
                 </AdminField>
 
                 <AdminField label="Prefilled message (optional)">
@@ -155,7 +170,7 @@ function WhatsAppLinkGenerator() {
                         value={message}
                         onChange={(e) => {
                             setCopied(false);
-                            setMessage(e.target.value);
+                            onMessageChange(e.target.value);
                         }}
                     />
                 </AdminField>
@@ -211,6 +226,8 @@ export default function AdminSettings({
         contact_email: string;
         whatsapp_number: string;
         whatsapp_message: string;
+        ad_whatsapp_number: string;
+        ad_whatsapp_message: string;
         mail_enabled: boolean;
         brevo_api_key: string;
         mail_from_address: string;
@@ -223,6 +240,8 @@ export default function AdminSettings({
         contact_email: settings.contact_email,
         whatsapp_number: settings.whatsapp_number,
         whatsapp_message: settings.whatsapp_message,
+        ad_whatsapp_number: settings.ad_whatsapp_number,
+        ad_whatsapp_message: settings.ad_whatsapp_message,
         mail_enabled: settings.mail_enabled,
         brevo_api_key: '',
         mail_from_address: settings.mail_from_address || settings.contact_email,
@@ -361,7 +380,13 @@ export default function AdminSettings({
                         </div>
                     </AdminFormSection>
 
-                    <WhatsAppLinkGenerator />
+                    <WhatsAppLinkGenerator
+                        number={form.data.ad_whatsapp_number}
+                        message={form.data.ad_whatsapp_message}
+                        onNumberChange={(value) => form.setData('ad_whatsapp_number', value)}
+                        onMessageChange={(value) => form.setData('ad_whatsapp_message', value)}
+                        numberError={form.errors.ad_whatsapp_number}
+                    />
 
                     <AdminFormSection
                         title="Email (Brevo)"

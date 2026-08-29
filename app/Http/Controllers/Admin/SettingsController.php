@@ -26,6 +26,8 @@ class SettingsController extends Controller
                 'contact_email' => Setting::contactEmail(),
                 'whatsapp_number' => Setting::whatsappNumber(),
                 'whatsapp_message' => Setting::whatsappMessage(),
+                'ad_whatsapp_number' => Setting::adWhatsappNumber(),
+                'ad_whatsapp_message' => Setting::adWhatsappMessage(),
                 'mail_enabled' => $mail['enabled'],
                 'brevo_api_key_set' => $mail['api_key'] !== '',
                 'mail_from_address' => $mail['from_address'],
@@ -42,6 +44,8 @@ class SettingsController extends Controller
             'contact_email' => ['required', 'email', 'max:255'],
             'whatsapp_number' => ['nullable', 'string', 'max:32'],
             'whatsapp_message' => ['nullable', 'string', 'max:500'],
+            'ad_whatsapp_number' => ['nullable', 'string', 'max:32'],
+            'ad_whatsapp_message' => ['nullable', 'string', 'max:500'],
             'mail_enabled' => ['sometimes', 'boolean'],
             'brevo_api_key' => ['nullable', 'string', 'max:500'],
             'mail_from_address' => ['nullable', 'email', 'max:255'],
@@ -65,11 +69,28 @@ class SettingsController extends Controller
             }
         }
 
+        $adWhatsappDigits = preg_replace('/\D+/', '', (string) ($data['ad_whatsapp_number'] ?? '')) ?? '';
+        if (str_starts_with($adWhatsappDigits, '00')) {
+            $adWhatsappDigits = substr($adWhatsappDigits, 2);
+        }
+
+        if ($adWhatsappDigits !== '') {
+            if (str_starts_with($adWhatsappDigits, '0') || strlen($adWhatsappDigits) < 10 || strlen($adWhatsappDigits) > 15) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'ad_whatsapp_number' => 'Enter a full international number with country code, no leading 0. Example: 923001234567',
+                    ]);
+            }
+        }
+
         Setting::setValue('commission_percent', $data['commission_percent']);
         Setting::setValue('min_withdrawal', $data['min_withdrawal']);
         Setting::setValue('contact_email', $data['contact_email']);
         Setting::setValue('whatsapp_number', $whatsappDigits);
         Setting::setValue('whatsapp_message', trim((string) ($data['whatsapp_message'] ?? '')));
+        Setting::setValue('ad_whatsapp_number', $adWhatsappDigits);
+        Setting::setValue('ad_whatsapp_message', trim((string) ($data['ad_whatsapp_message'] ?? '')));
 
         $mailEnabled = (bool) ($data['mail_enabled'] ?? false);
         Setting::setValue('mail_enabled', $mailEnabled ? '1' : '0');

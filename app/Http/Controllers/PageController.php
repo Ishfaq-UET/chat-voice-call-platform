@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -34,7 +35,9 @@ class PageController extends Controller
 
     public function ad(): Response
     {
-        return Inertia::render('Pages/Ad');
+        return Inertia::render('Pages/Ad', [
+            'whatsapp_url' => Setting::adWhatsappUrl(),
+        ]);
     }
 
     public function pricing(): Response

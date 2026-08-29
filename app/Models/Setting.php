@@ -108,32 +108,36 @@ class Setting extends Model
 
     public static function whatsappUrl(): ?string
     {
-        $digits = static::whatsappDigits();
+        return static::buildWhatsappUrl(static::whatsappDigits(), static::whatsappMessage());
+    }
 
-        // WhatsApp requires E.164 without +: 10–15 digits with country code
-        if ($digits === '' || strlen($digits) < 10 || strlen($digits) > 15) {
-            return null;
+    public static function adWhatsappNumber(): string
+    {
+        return (string) static::getValue('ad_whatsapp_number', '');
+    }
+
+    public static function adWhatsappMessage(): string
+    {
+        return (string) static::getValue('ad_whatsapp_message', '');
+    }
+
+    public static function adWhatsappDigits(): string
+    {
+        $digits = preg_replace('/\D+/', '', static::adWhatsappNumber()) ?? '';
+
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
         }
 
-        // Local numbers starting with 0 (e.g. 0300…) are invalid for wa.me
-        if (str_starts_with($digits, '0')) {
-            return null;
-        }
+        return $digits;
+    }
 
-        $query = ['phone' => $digits];
-        $message = trim(static::whatsappMessage());
-
-        if ($message !== '') {
-            $query['text'] = $message;
-        }
-
-        // api.whatsapp.com is more reliable than wa.me on desktop clients
-        return 'https://api.whatsapp.com/send?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+    public static function adWhatsappUrl(): ?string
+    {
+        return static::buildWhatsappUrl(static::adWhatsappDigits(), static::adWhatsappMessage());
     }
 
     /**
-     * Public contact details shared to Inertia + contact page.
-     *
      * @return array{email: string, whatsapp_number: string, whatsapp_message: string, whatsapp_url: string|null}
      */
     public static function contact(): array
@@ -199,5 +203,25 @@ class Setting extends Model
         return $mail['enabled']
             && $mail['api_key'] !== ''
             && $mail['from_address'] !== '';
+    }
+
+    public static function buildWhatsappUrl(string $digits, string $message = ''): ?string
+    {
+        if ($digits === '' || strlen($digits) < 10 || strlen($digits) > 15) {
+            return null;
+        }
+
+        if (str_starts_with($digits, '0')) {
+            return null;
+        }
+
+        $query = ['phone' => $digits];
+        $message = trim($message);
+
+        if ($message !== '') {
+            $query['text'] = $message;
+        }
+
+        return 'https://api.whatsapp.com/send?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
     }
 }
