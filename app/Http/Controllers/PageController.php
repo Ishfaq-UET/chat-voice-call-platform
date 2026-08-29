@@ -32,6 +32,11 @@ class PageController extends Controller
         return Inertia::render('Pages/Contact');
     }
 
+    public function ad(): Response
+    {
+        return Inertia::render('Pages/Ad');
+    }
+
     public function pricing(): Response
     {
         return Inertia::render('Pages/Pricing');

@@ -30,6 +30,7 @@ Route::get('/how-it-works', [PageController::class, 'howItWorks'])->name('how-it
 Route::get('/safety', [PageController::class, 'safety'])->name('safety');
 Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::get('/ad', [PageController::class, 'ad'])->name('ad');
 Route::get('/pricing', [PageController::class, 'pricing'])->name('pricing');
 Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');

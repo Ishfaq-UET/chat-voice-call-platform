@@ -82,6 +82,123 @@ function BrandingUploadCard({
     );
 }
 
+function buildWhatsAppLink(number: string, message: string): string | null {
+    let digits = number.replace(/\D+/g, '');
+    if (digits.startsWith('00')) {
+        digits = digits.slice(2);
+    }
+    if (!digits || digits.length < 10 || digits.length > 15 || digits.startsWith('0')) {
+        return null;
+    }
+
+    const params = new URLSearchParams({ phone: digits });
+    const trimmed = message.trim();
+    if (trimmed) {
+        params.set('text', trimmed);
+    }
+
+    return `https://api.whatsapp.com/send?${params.toString()}`;
+}
+
+function WhatsAppLinkGenerator() {
+    const [number, setNumber] = useState('');
+    const [message, setMessage] = useState('');
+    const [copied, setCopied] = useState(false);
+
+    const link = useMemo(() => buildWhatsAppLink(number, message), [number, message]);
+
+    const copyLink = async () => {
+        if (!link) return;
+
+        try {
+            await navigator.clipboard.writeText(link);
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+        } catch {
+            // Fallback for older browsers
+            const input = document.createElement('textarea');
+            input.value = link;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+        }
+    };
+
+    return (
+        <AdminFormSection
+            title="WhatsApp link generator"
+            description="Enter any international number and get a shareable WhatsApp link. Click the link or Copy to use it."
+        >
+            <div className="grid gap-5">
+                <AdminField label="WhatsApp number">
+                    <AdminInput
+                        type="text"
+                        placeholder="923001234567"
+                        value={number}
+                        onChange={(e) => {
+                            setCopied(false);
+                            setNumber(e.target.value);
+                        }}
+                    />
+                    <p className="mt-1.5 text-xs text-slate-400">
+                        Country code + number, digits only. Example: 923001234567
+                    </p>
+                </AdminField>
+
+                <AdminField label="Prefilled message (optional)">
+                    <AdminInput
+                        type="text"
+                        placeholder="Hi, I need help with…"
+                        value={message}
+                        onChange={(e) => {
+                            setCopied(false);
+                            setMessage(e.target.value);
+                        }}
+                    />
+                </AdminField>
+
+                {link ? (
+                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
+                        <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Generated link</p>
+                        <button
+                            type="button"
+                            onClick={copyLink}
+                            className="mt-2 block w-full break-all rounded-xl bg-white px-3 py-2.5 text-left text-sm font-medium text-brand underline decoration-brand/30 underline-offset-2 transition hover:bg-emerald-50"
+                            title="Click to copy"
+                        >
+                            {link}
+                        </button>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                                type="button"
+                                onClick={copyLink}
+                                className="btn-brand !rounded-xl !px-4 !py-2 !text-sm"
+                            >
+                                {copied ? 'Copied!' : 'Copy link'}
+                            </button>
+                            <a
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-ghost !rounded-xl !px-4 !py-2 !text-sm"
+                            >
+                                Open in WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                ) : (
+                    <p className="text-sm text-slate-400">
+                        Enter a valid international number to generate a link.
+                    </p>
+                )}
+            </div>
+        </AdminFormSection>
+    );
+}
+
 export default function AdminSettings({
     settings,
 }: PageProps<{
@@ -243,6 +360,8 @@ export default function AdminSettings({
                             </AdminField>
                         </div>
                     </AdminFormSection>
+
+                    <WhatsAppLinkGenerator />
 
                     <AdminFormSection
                         title="Email (Brevo)"
